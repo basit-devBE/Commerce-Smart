@@ -1,6 +1,7 @@
 package com.example.Commerce.Config;
 
 import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.errorHandlers.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
@@ -24,9 +25,6 @@ public class RoleInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.getWriter().write("Forbidden: Insufficient role");
-        return false;
+        throw  new UnauthorizedException("User does not have required role to access this resource");
     }
 }
