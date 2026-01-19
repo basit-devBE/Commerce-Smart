@@ -1,7 +1,6 @@
 package com.example.Commerce.Services;
 
 import com.example.Commerce.DTOs.LoginDTO;
-import com.example.Commerce.DTOs.UserResponseDTO;
 import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Mappers.UserMapper;
 import com.example.Commerce.Repositories.UserRepository;
