@@ -71,8 +71,14 @@ public class InventoryService {
         InventoryEntity existingInventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
 
-        existingInventory.setQuantity(updateInventoryDTO.getQuantity());
-        existingInventory.setLocation(updateInventoryDTO.getLocation());
+        // Only update fields that are provided
+        if (updateInventoryDTO.getQuantity() != null) {
+            existingInventory.setQuantity(updateInventoryDTO.getQuantity());
+        }
+        
+        if (updateInventoryDTO.getLocation() != null) {
+            existingInventory.setLocation(updateInventoryDTO.getLocation());
+        }
 
         InventoryEntity updatedInventory = inventoryRepository.save(existingInventory);
         return inventoryMapper.toResponseDTO(updatedInventory);

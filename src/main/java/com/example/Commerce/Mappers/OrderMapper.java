@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
 public interface OrderMapper {
 
     @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "user.username", target = "userName")
+    @Mapping(source = "user.email", target = "userName")
     @Mapping(target = "items", ignore = true)
     OrderResponseDTO toResponseDTO(OrderEntity orderEntity);
 

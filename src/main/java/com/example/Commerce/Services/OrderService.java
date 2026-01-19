@@ -116,7 +116,11 @@ public class OrderService {
         OrderEntity order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
 
-        order.setStatus(updateOrderDTO.getStatus());
+        // Only update status if provided
+        if (updateOrderDTO.getStatus() != null) {
+            order.setStatus(updateOrderDTO.getStatus());
+        }
+        
         OrderEntity updatedOrder = orderRepository.save(order);
         List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(updatedOrder.getId());
         return buildOrderResponse(updatedOrder, items);

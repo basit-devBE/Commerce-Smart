@@ -20,7 +20,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @RequiresRole(UserRole.USER)
+    @RequiresRole(UserRole.CUSTOMER)
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> createOrder(@Valid @RequestBody AddOrderDTO request) {
         OrderResponseDTO order = orderService.createOrder(request);
@@ -47,7 +47,7 @@ public class OrderController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @RequiresRole(UserRole.USER)
+    @RequiresRole(UserRole.CUSTOMER)
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<PagedResponse<OrderResponseDTO>>> getOrdersByUserId(
             @PathVariable Long userId,
@@ -67,7 +67,7 @@ public class OrderController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @RequiresRole(UserRole.USER)
+    @RequiresRole(UserRole.CUSTOMER)
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> getOrderById(@PathVariable Long id) {
         OrderResponseDTO order = orderService.getOrderById(id);
