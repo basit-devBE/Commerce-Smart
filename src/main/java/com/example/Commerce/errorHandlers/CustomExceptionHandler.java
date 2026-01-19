@@ -86,6 +86,24 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
+        HashMap<String, Object> error = new HashMap<>();
+        error.put("timestamp", new Date());
+        error.put("message", ex.getMessage());
+        error.put("path", request.getDescription(false));
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        HashMap<String, Object> error = new HashMap<>();
+        error.put("timestamp", new Date());
+        error.put("message", ex.getMessage());
+        error.put("path", request.getDescription(false));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = JDBCException.class)
     public ResponseEntity<?> handleJDBCException(JDBCException ex, WebRequest request) {
         HashMap<String, Object> error = new HashMap<>();

@@ -131,12 +131,20 @@ public class OrderService {
         OrderEntity order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
 
-        // Delete order items first
-        List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(id);
-        orderItemsRepository.deleteAll(items);
+        try {
+            // Delete order items first
+            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(id);
+            orderItemsRepository.deleteAll(items);
 
-        // Delete order
-        orderRepository.delete(order);
+            // Delete order
+            orderRepository.delete(order);
+        } catch (Exception ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
+                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+                    "Cannot delete order. It has related dependencies that must be removed first.");
+            }
+            throw ex;
+        }
     }
 
     private OrderResponseDTO buildOrderResponse(OrderEntity order, List<OrderItemsEntity> items) {

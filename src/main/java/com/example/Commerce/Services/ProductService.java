@@ -96,7 +96,16 @@ public class ProductService {
     public void deleteProduct(Long id){
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
-        productRepository.delete(product);
+        
+        try {
+            productRepository.delete(product);
+        } catch (Exception ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
+                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+                    "Cannot delete product. It is being used in orders or inventory. Please remove related records first.");
+            }
+            throw ex;
+        }
     }
 }
 

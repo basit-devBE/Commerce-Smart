@@ -101,6 +101,15 @@ public class InventoryService {
     public void deleteInventory(Long id) {
         InventoryEntity inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
-        inventoryRepository.delete(inventory);
+        
+        try {
+            inventoryRepository.delete(inventory);
+        } catch (Exception ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
+                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+                    "Cannot delete inventory. It has related dependencies that must be removed first.");
+            }
+            throw ex;
+        }
     }
 }

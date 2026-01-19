@@ -68,6 +68,15 @@ public class CategoryService {
     public void deleteCategory(Long id) {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
-        categoryRepository.delete(category);
+        
+        try {
+            categoryRepository.delete(category);
+        } catch (Exception ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
+                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+                    "Cannot delete category. It is being used by one or more products. Please remove or reassign the products first.");
+            }
+            throw ex;
+        }
     }
 }
