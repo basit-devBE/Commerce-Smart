@@ -1,12 +1,14 @@
 package com.example.Commerce.Services;
 
 import com.example.Commerce.DTOs.*;
+import com.example.Commerce.Entities.InventoryEntity;
 import com.example.Commerce.Entities.OrderEntity;
 import com.example.Commerce.Entities.OrderItemsEntity;
 import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Enums.OrderStatus;
 import com.example.Commerce.Mappers.OrderMapper;
+import com.example.Commerce.Repositories.InventoryRepository;
 import com.example.Commerce.Repositories.OrderItemsRepository;
 import com.example.Commerce.Repositories.OrderRepository;
 import com.example.Commerce.Repositories.ProductRepository;
@@ -27,17 +29,20 @@ public class OrderService {
     private final OrderItemsRepository orderItemsRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final InventoryRepository inventoryRepository;
     private final OrderMapper orderMapper;
 
     public OrderService(OrderRepository orderRepository, 
                        OrderItemsRepository orderItemsRepository,
                        ProductRepository productRepository,
                        UserRepository userRepository,
+                       InventoryRepository inventoryRepository,
                        OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.inventoryRepository = inventoryRepository;
         this.orderMapper = orderMapper;
     }
 
@@ -47,9 +52,10 @@ public class OrderService {
         UserEntity user = userRepository.findById(addOrderDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + addOrderDTO.getUserId()));
 
-        // Calculate total amount and validate products
+        // Calculate total amount, validate products and check inventory
         double totalAmount = 0.0;
         List<OrderItemsEntity> orderItems = new ArrayList<>();
+        List<InventoryEntity> inventoriesToUpdate = new ArrayList<>();
 
         for (OrderItemDTO itemDTO : addOrderDTO.getItems()) {
             ProductEntity product = productRepository.findById(itemDTO.getProductId())
@@ -58,6 +64,18 @@ public class OrderService {
             if (!product.isAvailable()) {
                 throw new IllegalArgumentException("Product '" + product.getName() + "' is not available");
             }
+
+            // Check inventory
+            InventoryEntity inventory = inventoryRepository.findByProductId(product.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product '" + product.getName() + "' is out of stock"));
+
+            if (inventory.getQuantity() < itemDTO.getQuantity()) {
+                throw new IllegalArgumentException("Product '" + product.getName() + "' is out of stock");
+            }
+
+            // Reduce inventory quantity
+            inventory.setQuantity(inventory.getQuantity() - itemDTO.getQuantity());
+            inventoriesToUpdate.add(inventory);
 
             double itemTotal = product.getPrice() * itemDTO.getQuantity();
             totalAmount += itemTotal;
@@ -68,6 +86,9 @@ public class OrderService {
             orderItem.setTotalPrice(itemTotal);
             orderItems.add(orderItem);
         }
+
+        // Update all inventories
+        inventoryRepository.saveAll(inventoriesToUpdate);
 
         // Create and save order
         OrderEntity order = new OrderEntity();

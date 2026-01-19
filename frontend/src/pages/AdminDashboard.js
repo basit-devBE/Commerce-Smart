@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { productAPI, categoryAPI, orderAPI } from '../services/api';
+import { productAPI, categoryAPI, orderAPI, inventoryAPI } from '../services/api';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const AdminDashboard = () => {
@@ -7,7 +7,12 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [editingInventory, setEditingInventory] = useState(null);
+  const [newQuantity, setNewQuantity] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -21,6 +26,9 @@ const AdminDashboard = () => {
       } else if (activeTab === 'orders') {
         const response = await orderAPI.getAll({ page: 0, size: 100 });
         setOrders(response.data.data.content);
+      } else if (activeTab === 'inventory') {
+        const response = await inventoryAPI.getAll({ page: 0, size: 100 });
+        setInventory(response.data.data.content);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -33,9 +41,34 @@ const AdminDashboard = () => {
     fetchData();
   }, [fetchData]);
 
+  const handleUpdateOrderStatus = async (orderId, status) => {
+    try {
+      await orderAPI.updateStatus(orderId, { status });
+      setEditingOrder(null);
+      setNewStatus('');
+      fetchData(); // Refresh orders
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status');
+    }
+  };
+
+  const handleUpdateInventory = async (inventoryId, quantity) => {
+    try {
+      await inventoryAPI.update(inventoryId, { quantity: parseInt(quantity) });
+      setEditingInventory(null);
+      setNewQuantity('');
+      fetchData(); // Refresh inventory
+    } catch (error) {
+      console.error('Error updating inventory:', error);
+      alert('Failed to update inventory quantity');
+    }
+  };
+
   const tabs = [
     { id: 'products', name: 'Products' },
     { id: 'categories', name: 'Categories' },
+    { id: 'inventory', name: 'Inventory' },
     { id: 'orders', name: 'Orders' },
   ];
 
@@ -164,6 +197,99 @@ const AdminDashboard = () => {
                   </div>
                 )}
 
+                {/* Inventory Tab */}
+                {activeTab === 'inventory' && (
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Inventory Management</h2>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {inventory.map((item) => (
+                            <tr key={item.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">#{item.id}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{item.productName}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingInventory === item.id ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={newQuantity}
+                                    onChange={(e) => setNewQuantity(e.target.value)}
+                                    className="w-24 text-sm border border-gray-300 rounded px-2 py-1"
+                                  />
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-sm font-medium ${
+                                      item.quantity === 0 ? 'text-red-600' :
+                                      item.quantity < 10 ? 'text-yellow-600' :
+                                      'text-green-600'
+                                    }`}>
+                                      {item.quantity}
+                                    </span>
+                                    {item.quantity === 0 && (
+                                      <span className="px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded-full">Out of Stock</span>
+                                    )}
+                                    {item.quantity > 0 && item.quantity < 10 && (
+                                      <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">Low Stock</span>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">{item.location}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingInventory === item.id ? (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleUpdateInventory(item.id, newQuantity)}
+                                      className="text-green-600 hover:text-green-900 text-sm font-medium"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setEditingInventory(null);
+                                        setNewQuantity('');
+                                      }}
+                                      className="text-gray-600 hover:text-gray-900 text-sm font-medium"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setEditingInventory(item.id);
+                                      setNewQuantity(item.quantity.toString());
+                                    }}
+                                    className="text-primary-600 hover:text-primary-900"
+                                  >
+                                    <PencilIcon className="h-5 w-5" />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
                 {/* Orders Tab */}
                 {activeTab === 'orders' && (
                   <div>
@@ -177,6 +303,7 @@ const AdminDashboard = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -192,16 +319,63 @@ const AdminDashboard = () => {
                                 <div className="text-sm text-gray-900">${order.totalAmount.toFixed(2)}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                                  order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                  'bg-blue-100 text-blue-800'
-                                }`}>
-                                  {order.status}
-                                </span>
+                                {editingOrder === order.id ? (
+                                  <select
+                                    value={newStatus || order.status}
+                                    onChange={(e) => setNewStatus(e.target.value)}
+                                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                                  >
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="PROCESSING">PROCESSING</option>
+                                    <option value="SHIPPED">SHIPPED</option>
+                                    <option value="DELIVERED">DELIVERED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                  </select>
+                                ) : (
+                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                                    order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                    order.status === 'SHIPPED' ? 'bg-purple-100 text-purple-800' :
+                                    order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                  }`}>
+                                    {order.status}
+                                  </span>
+                                )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">{order.items?.length || 0} items</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingOrder === order.id ? (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleUpdateOrderStatus(order.id, newStatus || order.status)}
+                                      className="text-green-600 hover:text-green-900 text-sm font-medium"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setEditingOrder(null);
+                                        setNewStatus('');
+                                      }}
+                                      className="text-gray-600 hover:text-gray-900 text-sm font-medium"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setEditingOrder(order.id);
+                                      setNewStatus(order.status);
+                                    }}
+                                    className="text-primary-600 hover:text-primary-900"
+                                  >
+                                    <PencilIcon className="h-5 w-5" />
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))}
