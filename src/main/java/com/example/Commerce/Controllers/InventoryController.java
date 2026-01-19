@@ -3,11 +3,18 @@ package com.example.Commerce.Controllers;
 import com.example.Commerce.Config.RequiresRole;
 import com.example.Commerce.DTOs.AddInventoryDTO;
 import com.example.Commerce.DTOs.ApiResponse;
+import com.example.Commerce.DTOs.ErrorResponse;
 import com.example.Commerce.DTOs.InventoryResponseDTO;
 import com.example.Commerce.DTOs.PagedResponse;
 import com.example.Commerce.DTOs.UpdateInventoryDTO;
+import com.example.Commerce.DTOs.ValidationErrorResponse;
 import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.Services.InventoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Inventory Management", description = "APIs for managing product inventory")
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
@@ -24,6 +32,22 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
+    @Operation(summary = "Add inventory", description = "Creates a new inventory entry for a product. Requires ADMIN role.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Inventory created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation error", 
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - User does not have required role", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Conflict - Inventory already exists for this product", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @RequiresRole(UserRole.ADMIN)
     @PostMapping("/add")
     public ResponseEntity<ApiResponse<InventoryResponseDTO>> addInventory(@Valid @RequestBody AddInventoryDTO request) {

@@ -4,6 +4,11 @@ import com.example.Commerce.Config.RequiresRole;
 import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.Services.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -12,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Order Management", description = "APIs for managing orders")
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -21,6 +27,20 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @Operation(summary = "Create a new order", description = "Creates a new order for the authenticated user. Validates inventory stock before order placement.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation error or insufficient inventory", 
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden - User does not have required role", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product not found or out of stock", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @RequiresRole({UserRole.CUSTOMER, UserRole.ADMIN})
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> createOrder(

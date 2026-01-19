@@ -15,32 +15,46 @@ const Products = () => {
   const { addToCart } = useCart();
   const [addedToCart, setAddedToCart] = useState(null);
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await productAPI.getAll({ page, size: 12 });
-      setProducts(response.data.data.content);
-      setTotalPages(response.data.data.totalPages);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
-
-  const fetchCategories = useCallback(async () => {
-    try {
-      const response = await categoryAPI.getAll({ page: 0, size: 100 });
-      setCategories(response.data.data.content);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryAPI.getAll({ page: 0, size: 100 });
+        setCategories(response.data.data.content);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [fetchProducts, fetchCategories]);
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const params = { page, size: 12 };
+        
+        // Add categoryId if a specific category is selected
+        if (selectedCategory !== 'all') {
+          const category = categories.find(cat => cat.name === selectedCategory);
+          if (category) {
+            params.categoryId = category.id;
+          }
+        }
+        
+        const response = await productAPI.getAll(params);
+        setProducts(response.data.data.content);
+        setTotalPages(response.data.data.totalPages);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (categories.length > 0 || selectedCategory === 'all') {
+      fetchProducts();
+    }
+  }, [page, selectedCategory, categories]);
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -48,10 +62,19 @@ const Products = () => {
     setTimeout(() => setAddedToCart(null), 2000);
   };
 
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setPage(0); // Reset to first page
+  };
+
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+    setPage(0); // Reset to first page
+  };
+
   const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategory === 'all' || product.categoryName === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesSearch;
   });
 
   return (
@@ -74,7 +97,7 @@ const Products = () => {
                 placeholder="Search products..."
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
 
@@ -83,7 +106,7 @@ const Products = () => {
               <select
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (

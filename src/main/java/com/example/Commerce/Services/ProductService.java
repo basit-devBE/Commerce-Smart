@@ -58,6 +58,20 @@ public class ProductService {
         });
     }
 
+    public Page<ProductResponseDTO> getProductsByCategory(Long categoryId, Pageable pageable){
+        // Validate category exists
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
+        
+        return productRepository.findByCategoryId(categoryId, pageable).map(product -> {
+            ProductResponseDTO response = productMapper.toResponseDTO(product);
+            // Set quantity from inventory if exists
+            inventoryRepository.findByProductId(product.getId())
+                    .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
+            return response;
+        });
+    }
+
     public ProductResponseDTO getProductById(Long id){
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));

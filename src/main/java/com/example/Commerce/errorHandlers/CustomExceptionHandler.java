@@ -1,6 +1,9 @@
 package com.example.Commerce.errorHandlers;
 
 
+import com.example.Commerce.DTOs.ErrorResponse;
+import com.example.Commerce.DTOs.ValidationErrorResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Hidden
 public class CustomExceptionHandler {
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
