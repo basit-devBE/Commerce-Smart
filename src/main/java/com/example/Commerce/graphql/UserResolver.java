@@ -2,7 +2,6 @@ package com.example.Commerce.graphql;
 
 import com.example.Commerce.DTOs.userSummaryDTO;
 import com.example.Commerce.Services.UserService;
-import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
