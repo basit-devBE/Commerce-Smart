@@ -28,6 +28,24 @@ type Inventory {
     location: String!
 }
 
+input AddProductInput {
+    name: String!
+    categoryId: ID!
+    sku: String!
+    price: Float!
+}
+
+input AddInventoryInput {
+    productId: ID!
+    quantity: Int!
+    location: String!
+}
+
+input UpdateInventoryInput {
+    quantity: Int
+    location: String
+}
+
 type Query {
     getUserById(id: ID!): User
     getAllUsers: [User!]!
@@ -36,4 +54,12 @@ type Query {
     allInventories: [Inventory!]!
     inventoryById(id: ID!): Inventory
     inventoryByProductId(productId: ID!): Inventory
+}
+
+type Mutation {
+    addProduct(input: AddProductInput!): Product!
+    deleteProduct(id: ID!): Boolean!
+    addInventory(input: AddInventoryInput!): Inventory!
+    updateInventory(id: ID!, input: UpdateInventoryInput!): Inventory!
+    deleteInventory(id: ID!): Boolean!
 }
