@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { productAPI, categoryAPI, orderAPI, inventoryAPI } from '../services/api';
+import { productAPI, categoryAPI, orderAPI, inventoryAPI, userAPI } from '../services/api';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 const AdminDashboard = () => {
@@ -8,11 +8,14 @@ const AdminDashboard = () => {
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [inventory, setInventory] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [editingInventory, setEditingInventory] = useState(null);
   const [newQuantity, setNewQuantity] = useState('');
+  const [editingUser, setEditingUser] = useState(null);
+  const [newUserData, setNewUserData] = useState({});
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -29,6 +32,9 @@ const AdminDashboard = () => {
       } else if (activeTab === 'inventory') {
         const response = await inventoryAPI.getAll({ page: 0, size: 100 });
         setInventory(response.data.data.content);
+      } else if (activeTab === 'users') {
+        const response = await userAPI.getAll({ page: 0, size: 100 });
+        setUsers(response.data.data.content);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -65,11 +71,37 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateUser = async (userId, data) => {
+    try {
+      await userAPI.update(userId, data);
+      setEditingUser(null);
+      setNewUserData({});
+      fetchData(); // Refresh users
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
+      return;
+    }
+    try {
+      await userAPI.delete(userId);
+      fetchData(); // Refresh users
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    }
+  };
+
   const tabs = [
     { id: 'products', name: 'Products' },
     { id: 'categories', name: 'Categories' },
     { id: 'inventory', name: 'Inventory' },
     { id: 'orders', name: 'Orders' },
+    { id: 'users', name: 'Users' },
   ];
 
   return (
@@ -375,6 +407,118 @@ const AdminDashboard = () => {
                                   >
                                     <PencilIcon className="h-5 w-5" />
                                   </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Users Tab */}
+                {activeTab === 'users' && (
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">User Management</h2>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {users.map((user) => (
+                            <tr key={user.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">#{user.id}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingUser === user.id ? (
+                                  <input
+                                    type="text"
+                                    value={newUserData.name || ''}
+                                    onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
+                                    className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
+                                    placeholder="Name"
+                                  />
+                                ) : (
+                                  <div className="text-sm text-gray-900">{user.name}</div>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingUser === user.id ? (
+                                  <input
+                                    type="email"
+                                    value={newUserData.email || ''}
+                                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                                    className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
+                                    placeholder="Email"
+                                  />
+                                ) : (
+                                  <div className="text-sm text-gray-500">{user.email}</div>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingUser === user.id ? (
+                                  <select
+                                    value={newUserData.role || user.role}
+                                    onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
+                                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                                  >
+                                    <option value="CUSTOMER">CUSTOMER</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                  </select>
+                                ) : (
+                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                    user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                                  }`}>
+                                    {user.role}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {editingUser === user.id ? (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleUpdateUser(user.id, newUserData)}
+                                      className="text-green-600 hover:text-green-900 text-sm font-medium"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setEditingUser(null);
+                                        setNewUserData({});
+                                      }}
+                                      className="text-gray-600 hover:text-gray-900 text-sm font-medium"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingUser(user.id);
+                                        setNewUserData({ name: user.name, email: user.email, role: user.role });
+                                      }}
+                                      className="text-primary-600 hover:text-primary-900"
+                                    >
+                                      <PencilIcon className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteUser(user.id)}
+                                      className="text-red-600 hover:text-red-900"
+                                    >
+                                      <TrashIcon className="h-5 w-5" />
+                                    </button>
+                                  </div>
                                 )}
                               </td>
                             </tr>

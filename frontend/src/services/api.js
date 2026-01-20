@@ -83,4 +83,12 @@ export const inventoryAPI = {
   delete: (id) => api.delete(`/inventory/${id}`),
 };
 
+// User Management APIs (Admin)
+export const userAPI = {
+  getAll: (params) => api.get('/users/all', { params }),
+  getById: (id) => api.get(`/users/${id}`),
+  update: (id, data) => api.put(`/users/update/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
+};
+
 export default api;

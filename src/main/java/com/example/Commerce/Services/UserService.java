@@ -91,6 +91,9 @@ public class UserService {
         if(userDTO.getEmail() != null && !userDTO.getEmail().isBlank()){
             userEntity.setEmail(userDTO.getEmail());
         }
+        if(userDTO.getRole() != null){
+            userEntity.setRole(userDTO.getRole());
+        }
         UserEntity updatedUser = userRepository.save(userEntity);
         return userMapper.toSummaryDTO(updatedUser);
     }
