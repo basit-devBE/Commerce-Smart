@@ -26,9 +26,18 @@ public class PerformanceController {
     @Operation(summary = "Get database fetch times", description = "Retrieves all recorded database query execution times. Requires ADMIN role.")
     @RequiresRole(UserRole.ADMIN)
     @GetMapping("/db-metrics")
-    public ResponseEntity<ApiResponse<Map<String, Long>>> getDbMetrics() {
-        Map<String, Long> metrics = performanceAspect.getDbFetchTimes();
-        ApiResponse<Map<String, Long>> response = new ApiResponse<>(HttpStatus.OK.value(), "Performance metrics retrieved successfully", metrics);
+    public ResponseEntity<ApiResponse<Map<String, Map<String, Object>>>> getDbMetrics() {
+        Map<String, Map<String, Object>> metrics = performanceAspect.getDbFetchTimes();
+        ApiResponse<Map<String, Map<String, Object>>> response = new ApiResponse<>(HttpStatus.OK.value(), "Performance metrics retrieved successfully", metrics);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get cache metrics", description = "Retrieves cache hit/miss statistics. Requires ADMIN role.")
+    @RequiresRole(UserRole.ADMIN)
+    @GetMapping("/cache-metrics")
+    public ResponseEntity<ApiResponse<Map<String, Map<String, Object>>>> getCacheMetrics() {
+        Map<String, Map<String, Object>> metrics = performanceAspect.getCacheMetrics();
+        ApiResponse<Map<String, Map<String, Object>>> response = new ApiResponse<>(HttpStatus.OK.value(), "Cache metrics retrieved successfully", metrics);
         return ResponseEntity.ok(response);
     }
 
