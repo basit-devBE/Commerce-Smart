@@ -22,3 +22,5 @@ public class UserRegistrationDTO {
 
     private UserRole role = UserRole.CUSTOMER;
 }
+
+
