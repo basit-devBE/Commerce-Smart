@@ -89,41 +89,23 @@ public class ProductService {
         ProductEntity existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
         
-        // Check if name is being changed and if new name already exists
         if(updateProductDTO.getName() != null && 
            !existingProduct.getName().equalsIgnoreCase(updateProductDTO.getName()) && 
            productRepository.existsByNameIgnoreCase(updateProductDTO.getName())){
             throw new ResourceAlreadyExists("Product with name '" + updateProductDTO.getName() + "' already exists");
         }
 
-        // Only update fields that are provided
-        if(updateProductDTO.getName() != null) {
-            existingProduct.setName(updateProductDTO.getName());
-        }
-        
         if(updateProductDTO.getCategoryId() != null) {
             CategoryEntity category = categoryRepository.findById(updateProductDTO.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + updateProductDTO.getCategoryId()));
             existingProduct.setCategory(category);
         }
-        
-        if(updateProductDTO.getSku() != null) {
-            existingProduct.setSku(updateProductDTO.getSku());
-        }
-        
-        if(updateProductDTO.getPrice() != null) {
-            existingProduct.setPrice(updateProductDTO.getPrice());
-        }
-        
-        if(updateProductDTO.getIsAvailable() != null) {
-            existingProduct.setAvailable(updateProductDTO.getIsAvailable());
-        }
 
+        productMapper.updateEntity(updateProductDTO, existingProduct);
         ProductEntity updatedProduct = productRepository.save(existingProduct);
         ProductResponseDTO response = productMapper.toResponseDTO(updatedProduct);
         response.setCategoryName(updatedProduct.getCategory().getName());
         
-        // Set quantity from inventory if exists
         inventoryRepository.findByProductId(updatedProduct.getId())
                 .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
         

@@ -16,4 +16,10 @@ public interface ProductMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     ProductEntity toEntity(AddProductDTO addProductDTO);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(com.example.Commerce.DTOs.UpdateProductDTO updateDTO, @org.mapstruct.MappingTarget ProductEntity entity);
 }

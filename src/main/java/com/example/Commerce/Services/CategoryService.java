@@ -45,22 +45,13 @@ public class CategoryService {
         CategoryEntity existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
 
-        // Check if name is being changed and if new name already exists
         if (updateCategoryDTO.getName() != null &&
                 !existingCategory.getName().equalsIgnoreCase(updateCategoryDTO.getName()) &&
                 categoryRepository.existsByNameIgnoreCase(updateCategoryDTO.getName())) {
             throw new ResourceAlreadyExists("Category with name '" + updateCategoryDTO.getName() + "' already exists");
         }
 
-        // Only update fields that are provided
-        if (updateCategoryDTO.getName() != null) {
-            existingCategory.setName(updateCategoryDTO.getName());
-        }
-        
-        if (updateCategoryDTO.getDescription() != null) {
-            existingCategory.setDescription(updateCategoryDTO.getDescription());
-        }
-
+        categoryMapper.updateEntity(updateCategoryDTO, existingCategory);
         CategoryEntity updatedCategory = categoryRepository.save(existingCategory);
         return categoryMapper.toResponseDTO(updatedCategory);
     }

@@ -83,18 +83,8 @@ public class UserService {
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        if(userDTO.getFirstName() != null && !userDTO.getFirstName().isBlank()){
-            userEntity.setFirstName(userDTO.getFirstName());
-        }
-        if(userDTO.getLastName() != null && !userDTO.getLastName().isBlank()){
-            userEntity.setLastName(userDTO.getLastName());
-        }
-        if(userDTO.getEmail() != null && !userDTO.getEmail().isBlank()){
-            userEntity.setEmail(userDTO.getEmail());
-        }
-        if(userDTO.getRole() != null){
-            userEntity.setRole(userDTO.getRole());
-        }
+        
+        userMapper.updateEntity(userDTO, userEntity);
         UserEntity updatedUser = userRepository.save(userEntity);
         return userMapper.toSummaryDTO(updatedUser);
     }

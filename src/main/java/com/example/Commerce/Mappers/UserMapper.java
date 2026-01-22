@@ -17,4 +17,10 @@ public interface UserMapper {
     UserEntity toEntity(UserRegistrationDTO UserRegistrationDTO);
 
     userSummaryDTO toSummaryDTO(UserEntity userEntity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(com.example.Commerce.DTOs.UpdateUserDTO updateDTO, @org.mapstruct.MappingTarget UserEntity entity);
 }

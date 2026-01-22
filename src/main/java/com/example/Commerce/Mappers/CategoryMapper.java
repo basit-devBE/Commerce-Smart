@@ -15,4 +15,9 @@ public interface CategoryMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     CategoryEntity toEntity(AddCategoryDTO addCategoryDTO);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(com.example.Commerce.DTOs.UpdateCategoryDTO updateDTO, @org.mapstruct.MappingTarget CategoryEntity entity);
 }
