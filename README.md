@@ -20,6 +20,7 @@ The project emphasizes performance and scalability, featuring custom-built sorti
     - Database versioning/schema management with Hibernate (DDL-auto).
     - Seed data generation for development.
 - **Documentation**: Integrated **Swagger/OpenAPI** for REST API exploration and **GraphiQL** for GraphQL queries.
+- **Performance Report**: Comprehensive analytical comparison between REST and GraphQL endpoints (see `PERFORMANCE_REPORT.md`).
 
 ## 🛠 Tech Stack
 
