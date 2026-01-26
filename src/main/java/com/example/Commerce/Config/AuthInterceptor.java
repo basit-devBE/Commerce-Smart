@@ -23,6 +23,10 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, Object handler) throws Exception{
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+        
         String authHeader = request.getHeader("Authorization");
         log.info("Auth Header: {}", authHeader);
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
