@@ -21,12 +21,14 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
     private final com.example.Commerce.Repositories.InventoryRepository inventoryRepository;
+    private final com.example.Commerce.cache.CacheManager cacheManager;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper,CategoryRepository categoryRepository, com.example.Commerce.Repositories.InventoryRepository inventoryRepository) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper,CategoryRepository categoryRepository, com.example.Commerce.Repositories.InventoryRepository inventoryRepository, com.example.Commerce.cache.CacheManager cacheManager) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
         this.inventoryRepository = inventoryRepository;
+        this.cacheManager = cacheManager;
     }
 
     public ProductResponseDTO addProduct(AddProductDTO addProductDTO){
@@ -73,16 +75,17 @@ public class ProductService {
     }
 
     public ProductResponseDTO getProductById(Long id){
-        ProductEntity product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
-        ProductResponseDTO response = productMapper.toResponseDTO(product);
-        response.setCategoryName(product.getCategory().getName());
-        
-        // Set quantity from inventory if exists
-        inventoryRepository.findByProductId(product.getId())
-                .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
-        
-        return response;
+        return cacheManager.get("product:" + id, () -> {
+            ProductEntity product = productRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+            ProductResponseDTO response = productMapper.toResponseDTO(product);
+            response.setCategoryName(product.getCategory().getName());
+            
+            inventoryRepository.findByProductId(product.getId())
+                    .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
+            
+            return response;
+        });
     }
 
     public ProductResponseDTO updateProduct(Long id, UpdateProductDTO updateProductDTO){
@@ -103,6 +106,9 @@ public class ProductService {
 
         productMapper.updateEntity(updateProductDTO, existingProduct);
         ProductEntity updatedProduct = productRepository.save(existingProduct);
+        
+        cacheManager.invalidate("product:" + id);
+        
         ProductResponseDTO response = productMapper.toResponseDTO(updatedProduct);
         response.setCategoryName(updatedProduct.getCategory().getName());
         
@@ -127,6 +133,7 @@ public class ProductService {
         
         try {
             productRepository.delete(product);
+            cacheManager.invalidate("product:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
                 throw new com.example.Commerce.errorHandlers.ConstraintViolationException(

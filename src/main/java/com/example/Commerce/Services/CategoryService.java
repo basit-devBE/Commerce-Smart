@@ -16,10 +16,12 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final com.example.Commerce.cache.CacheManager cacheManager;
 
-    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, com.example.Commerce.cache.CacheManager cacheManager) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
+        this.cacheManager = cacheManager;
     }
 
     public CategoryResponseDTO addCategory(AddCategoryDTO addCategoryDTO) {
@@ -36,9 +38,11 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO getCategoryById(Long id) {
-        CategoryEntity category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
-        return categoryMapper.toResponseDTO(category);
+        return cacheManager.get("category:" + id, () -> {
+            CategoryEntity category = categoryRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
+            return categoryMapper.toResponseDTO(category);
+        });
     }
 
     public CategoryResponseDTO updateCategory(Long id, UpdateCategoryDTO updateCategoryDTO) {
@@ -53,6 +57,9 @@ public class CategoryService {
 
         categoryMapper.updateEntity(updateCategoryDTO, existingCategory);
         CategoryEntity updatedCategory = categoryRepository.save(existingCategory);
+        
+        cacheManager.invalidate("category:" + id);
+        
         return categoryMapper.toResponseDTO(updatedCategory);
     }
 
@@ -62,6 +69,7 @@ public class CategoryService {
         
         try {
             categoryRepository.delete(category);
+            cacheManager.invalidate("category:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
                 throw new com.example.Commerce.errorHandlers.ConstraintViolationException(

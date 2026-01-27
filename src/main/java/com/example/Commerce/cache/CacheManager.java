@@ -33,8 +33,4 @@ public class CacheManager {
     public void invalidate(String key) {
         cache.remove(key);
     }
-
-    public void clear() {
-        cache.clear();
-    }
 }

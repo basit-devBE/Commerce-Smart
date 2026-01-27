@@ -22,10 +22,12 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final com.example.Commerce.cache.CacheManager cacheManager;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, com.example.Commerce.cache.CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.cacheManager = cacheManager;
     }
 
     public LoginResponseDTO addUser(UserRegistrationDTO userDTO){
@@ -73,12 +75,14 @@ public class UserService {
     }
 
     public userSummaryDTO findUserById(Long id){
-        Optional<UserEntity> userOpt = userRepository.findById(id);
-        if(userOpt.isPresent()){
-            return userMapper.toSummaryDTO(userOpt.get());
-        } else {
-            throw new ResourceNotFoundException("User not found with id: " + id);
-        }
+        return cacheManager.get("user:" + id, () -> {
+            Optional<UserEntity> userOpt = userRepository.findById(id);
+            if(userOpt.isPresent()){
+                return userMapper.toSummaryDTO(userOpt.get());
+            } else {
+                throw new ResourceNotFoundException("User not found with id: " + id);
+            }
+        });
     }
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)
@@ -86,6 +90,9 @@ public class UserService {
         
         userMapper.updateEntity(userDTO, userEntity);
         UserEntity updatedUser = userRepository.save(userEntity);
+        
+        cacheManager.invalidate("user:" + id);
+        
         return userMapper.toSummaryDTO(updatedUser);
     }
 
@@ -101,5 +108,6 @@ public class UserService {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(userEntity);
+        cacheManager.invalidate("user:" + id);
     }
 }

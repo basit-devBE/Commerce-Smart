@@ -19,13 +19,16 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final InventoryMapper inventoryMapper;
+    private final com.example.Commerce.cache.CacheManager cacheManager;
 
     public InventoryService(InventoryRepository inventoryRepository, 
                            ProductRepository productRepository,
-                           InventoryMapper inventoryMapper) {
+                           InventoryMapper inventoryMapper,
+                           com.example.Commerce.cache.CacheManager cacheManager) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.inventoryMapper = inventoryMapper;
+        this.cacheManager = cacheManager;
     }
 
     public InventoryResponseDTO addInventory(AddInventoryDTO addInventoryDTO) {
@@ -52,26 +55,28 @@ public class InventoryService {
     }
 
     public InventoryResponseDTO getInventoryById(Long id) {
-        InventoryEntity inventory = inventoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
-        return inventoryMapper.toResponseDTO(inventory);
+        return cacheManager.get("inventory:" + id, () -> {
+            InventoryEntity inventory = inventoryRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
+            return inventoryMapper.toResponseDTO(inventory);
+        });
     }
 
     public InventoryResponseDTO getInventoryByProductId(Long productId) {
-        // Validate product exists
-        productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + productId));
+        return cacheManager.get("inventory:product:" + productId, () -> {
+            productRepository.findById(productId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + productId));
 
-        InventoryEntity inventory = inventoryRepository.findByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product ID: " + productId));
-        return inventoryMapper.toResponseDTO(inventory);
+            InventoryEntity inventory = inventoryRepository.findByProductId(productId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product ID: " + productId));
+            return inventoryMapper.toResponseDTO(inventory);
+        });
     }
 
     public InventoryResponseDTO updateInventory(Long id, UpdateInventoryDTO updateInventoryDTO) {
         InventoryEntity existingInventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
 
-        // Only update fields that are provided
         if (updateInventoryDTO.getQuantity() != null) {
             existingInventory.setQuantity(updateInventoryDTO.getQuantity());
         }
@@ -81,6 +86,11 @@ public class InventoryService {
         }
 
         InventoryEntity updatedInventory = inventoryRepository.save(existingInventory);
+        
+        cacheManager.invalidate("inventory:" + id);
+        cacheManager.invalidate("inventory:product:" + existingInventory.getProduct().getId());
+        cacheManager.invalidate("product:" + existingInventory.getProduct().getId());
+        
         return inventoryMapper.toResponseDTO(updatedInventory);
     }
 
@@ -95,6 +105,11 @@ public class InventoryService {
 
         inventory.setQuantity(newQuantity);
         InventoryEntity updatedInventory = inventoryRepository.save(inventory);
+        
+        cacheManager.invalidate("inventory:" + id);
+        cacheManager.invalidate("inventory:product:" + inventory.getProduct().getId());
+        cacheManager.invalidate("product:" + inventory.getProduct().getId());
+        
         return inventoryMapper.toResponseDTO(updatedInventory);
     }
 
@@ -102,8 +117,13 @@ public class InventoryService {
         InventoryEntity inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
         
+        Long productId = inventory.getProduct().getId();
+        
         try {
             inventoryRepository.delete(inventory);
+            cacheManager.invalidate("inventory:" + id);
+            cacheManager.invalidate("inventory:product:" + productId);
+            cacheManager.invalidate("product:" + productId);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
                 throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
