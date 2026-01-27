@@ -67,48 +67,55 @@ public class UserService {
     }
 
     public userSummaryDTO findUserByEmail(String email){
-        Optional<UserEntity> userOpt = userRepository.findByEmail(email);
-        if(userOpt.isPresent()){
-            return userMapper.toSummaryDTO(userOpt.get());
-        } else {
-            throw new ResourceNotFoundException("User not found with email: " + email);
-        }
+        return cacheManager.get("user:email:" + email, () -> {
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+            return userMapper.toSummaryDTO(user);
+        });
     }
 
     public userSummaryDTO findUserById(Long id){
         return cacheManager.get("user:" + id, () -> {
-            Optional<UserEntity> userOpt = userRepository.findById(id);
-            if(userOpt.isPresent()){
-                return userMapper.toSummaryDTO(userOpt.get());
-            } else {
-                throw new ResourceNotFoundException("User not found with id: " + id);
-            }
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+            return userMapper.toSummaryDTO(user);
         });
     }
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
+        String oldEmail = userEntity.getEmail();
         userMapper.updateEntity(userDTO, userEntity);
         UserEntity updatedUser = userRepository.save(userEntity);
         
         cacheManager.invalidate("user:" + id);
+        cacheManager.invalidate("user:email:" + oldEmail);
+        if (userDTO.getEmail() != null && !oldEmail.equals(userDTO.getEmail())) {
+            cacheManager.invalidate("user:email:" + userDTO.getEmail());
+        }
         
         return userMapper.toSummaryDTO(updatedUser);
     }
 
     public Page<userSummaryDTO> getAllUsers(Pageable pageable){
-      return userRepository.findAll(pageable).map(userMapper::toSummaryDTO);
+        return userRepository.findAll(pageable).map(user -> 
+            cacheManager.get("user:" + user.getId(), () -> userMapper.toSummaryDTO(user))
+        );
     }
 
     public List<userSummaryDTO> getAllUsersList() {
-        return userRepository.findAll().stream().map(userMapper::toSummaryDTO).toList();
+        return userRepository.findAll().stream()
+            .map(user -> cacheManager.get("user:" + user.getId(), () -> userMapper.toSummaryDTO(user)))
+            .toList();
     }
 
     public void deleteUser(Long id){
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        String email = userEntity.getEmail();
         userRepository.delete(userEntity);
         cacheManager.invalidate("user:" + id);
+        cacheManager.invalidate("user:email:" + email);
     }
 }

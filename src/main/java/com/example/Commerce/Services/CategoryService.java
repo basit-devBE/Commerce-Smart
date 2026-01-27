@@ -36,7 +36,9 @@ public class CategoryService {
     }
 
     public Page<CategoryResponseDTO> getAllCategories(Pageable pageable) {
-        return categoryRepository.findAll(pageable).map(categoryMapper::toResponseDTO);
+        return categoryRepository.findAll(pageable).map(category -> 
+            cacheManager.get("category:" + category.getId(), () -> categoryMapper.toResponseDTO(category))
+        );
     }
 
     public CategoryResponseDTO getCategoryById(Long id) {

@@ -118,10 +118,12 @@ public class OrderService {
     }
 
     public Page<OrderResponseDTO> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable).map(order -> {
-            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-            return buildOrderResponse(order, items);
-        });
+        return orderRepository.findAll(pageable).map(order -> 
+            cacheManager.get("order:" + order.getId(), () -> {
+                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                return buildOrderResponse(order, items);
+            })
+        );
     }
 
     public Page<OrderResponseDTO> getOrdersByUserId(Long userId, Pageable pageable) {
@@ -129,10 +131,12 @@ public class OrderService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        return orderRepository.findByUserId(userId, pageable).map(order -> {
-            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-            return buildOrderResponse(order, items);
-        });
+        return orderRepository.findByUserId(userId, pageable).map(order -> 
+            cacheManager.get("order:" + order.getId(), () -> {
+                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                return buildOrderResponse(order, items);
+            })
+        );
     }
 
     public OrderResponseDTO getOrderById(Long id) {
