@@ -89,13 +89,17 @@ public class InventoryService {
             existingInventory.setLocation(updateInventoryDTO.getLocation());
         }
 
+        return getInventoryResponseDTO(id, existingInventory);
+    }
+
+    private InventoryResponseDTO getInventoryResponseDTO(Long id, InventoryEntity existingInventory) {
         InventoryEntity updatedInventory = inventoryRepository.save(existingInventory);
-        
+
         cacheManager.invalidate("inventory:" + id);
         cacheManager.invalidate("inventory:product:" + existingInventory.getProduct().getId());
         cacheManager.invalidate("inventory:quantity:" + existingInventory.getProduct().getId());
         cacheManager.invalidate("product:" + existingInventory.getProduct().getId());
-        
+
         return inventoryMapper.toResponseDTO(updatedInventory);
     }
 
@@ -109,14 +113,7 @@ public class InventoryService {
         }
 
         inventory.setQuantity(newQuantity);
-        InventoryEntity updatedInventory = inventoryRepository.save(inventory);
-        
-        cacheManager.invalidate("inventory:" + id);
-        cacheManager.invalidate("inventory:product:" + inventory.getProduct().getId());
-        cacheManager.invalidate("inventory:quantity:" + inventory.getProduct().getId());
-        cacheManager.invalidate("product:" + inventory.getProduct().getId());
-        
-        return inventoryMapper.toResponseDTO(updatedInventory);
+        return getInventoryResponseDTO(id, inventory);
     }
 
     public void deleteInventory(Long id) {
