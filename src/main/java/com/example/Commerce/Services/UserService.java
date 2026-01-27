@@ -4,6 +4,7 @@ import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Mappers.UserMapper;
 import com.example.Commerce.Repositories.UserRepository;
+import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import jakarta.validation.Valid;
@@ -22,9 +23,9 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final com.example.Commerce.cache.CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, com.example.Commerce.cache.CacheManager cacheManager) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, CacheManager cacheManager) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.cacheManager = cacheManager;

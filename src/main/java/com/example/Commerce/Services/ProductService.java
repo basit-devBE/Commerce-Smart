@@ -4,10 +4,14 @@ import com.example.Commerce.DTOs.AddProductDTO;
 import com.example.Commerce.DTOs.ProductResponseDTO;
 import com.example.Commerce.DTOs.UpdateProductDTO;
 import com.example.Commerce.Entities.CategoryEntity;
+import com.example.Commerce.Entities.InventoryEntity;
 import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.ProductMapper;
 import com.example.Commerce.Repositories.CategoryRepository;
+import com.example.Commerce.Repositories.InventoryRepository;
 import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -20,10 +24,10 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
-    private final com.example.Commerce.Repositories.InventoryRepository inventoryRepository;
-    private final com.example.Commerce.cache.CacheManager cacheManager;
+    private final InventoryRepository inventoryRepository;
+    private final CacheManager cacheManager;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper,CategoryRepository categoryRepository, com.example.Commerce.Repositories.InventoryRepository inventoryRepository, com.example.Commerce.cache.CacheManager cacheManager) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository, InventoryRepository inventoryRepository, CacheManager cacheManager) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
@@ -51,25 +55,30 @@ public class ProductService {
     }
 
     public Page<ProductResponseDTO> getAllProducts(Pageable pageable){
-        return productRepository.findAll(pageable).map(product -> {
+        return productRepository.findAllWithInventory(pageable).map(product -> {
             ProductResponseDTO response = productMapper.toResponseDTO(product);
-            // Set quantity from inventory if exists
-            inventoryRepository.findByProductId(product.getId())
-                    .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
+            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
+                inventoryRepository.findByProductId(product.getId())
+                    .map(InventoryEntity::getQuantity)
+                    .orElse(null)
+            );
+            response.setQuantity(quantity);
             return response;
         });
     }
 
     public Page<ProductResponseDTO> getProductsByCategory(Long categoryId, Pageable pageable){
-        // Validate category exists
         categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
         
-        return productRepository.findByCategoryId(categoryId, pageable).map(product -> {
+        return productRepository.findByCategoryIdWithInventory(categoryId, pageable).map(product -> {
             ProductResponseDTO response = productMapper.toResponseDTO(product);
-            // Set quantity from inventory if exists
-            inventoryRepository.findByProductId(product.getId())
-                    .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
+            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
+                inventoryRepository.findByProductId(product.getId())
+                    .map(InventoryEntity::getQuantity)
+                    .orElse(null)
+            );
+            response.setQuantity(quantity);
             return response;
         });
     }
@@ -108,6 +117,7 @@ public class ProductService {
         ProductEntity updatedProduct = productRepository.save(existingProduct);
         
         cacheManager.invalidate("product:" + id);
+        cacheManager.invalidate("inventory:quantity:" + id);
         
         ProductResponseDTO response = productMapper.toResponseDTO(updatedProduct);
         response.setCategoryName(updatedProduct.getCategory().getName());
@@ -119,10 +129,14 @@ public class ProductService {
     }
 
     public java.util.List<ProductResponseDTO> getAllProductsList() {
-        return productRepository.findAll().stream().map(product -> {
+        return productRepository.findAllWithInventory().stream().map(product -> {
             ProductResponseDTO response = productMapper.toResponseDTO(product);
-            inventoryRepository.findByProductId(product.getId())
-                    .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
+            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
+                inventoryRepository.findByProductId(product.getId())
+                    .map(InventoryEntity::getQuantity)
+                    .orElse(null)
+            );
+            response.setQuantity(quantity);
             return response;
         }).toList();
     }
@@ -134,9 +148,10 @@ public class ProductService {
         try {
             productRepository.delete(product);
             cacheManager.invalidate("product:" + id);
+            cacheManager.invalidate("inventory:quantity:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+            throw new ConstraintViolationException(
                     "Cannot delete product. It is being used in orders or inventory. Please remove related records first.");
             }
             throw ex;

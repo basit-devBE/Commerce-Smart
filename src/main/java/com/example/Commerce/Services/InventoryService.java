@@ -8,6 +8,8 @@ import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.InventoryMapper;
 import com.example.Commerce.Repositories.InventoryRepository;
 import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -19,12 +21,12 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final InventoryMapper inventoryMapper;
-    private final com.example.Commerce.cache.CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     public InventoryService(InventoryRepository inventoryRepository, 
                            ProductRepository productRepository,
                            InventoryMapper inventoryMapper,
-                           com.example.Commerce.cache.CacheManager cacheManager) {
+                           CacheManager cacheManager) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.inventoryMapper = inventoryMapper;
@@ -89,6 +91,7 @@ public class InventoryService {
         
         cacheManager.invalidate("inventory:" + id);
         cacheManager.invalidate("inventory:product:" + existingInventory.getProduct().getId());
+        cacheManager.invalidate("inventory:quantity:" + existingInventory.getProduct().getId());
         cacheManager.invalidate("product:" + existingInventory.getProduct().getId());
         
         return inventoryMapper.toResponseDTO(updatedInventory);
@@ -108,6 +111,7 @@ public class InventoryService {
         
         cacheManager.invalidate("inventory:" + id);
         cacheManager.invalidate("inventory:product:" + inventory.getProduct().getId());
+        cacheManager.invalidate("inventory:quantity:" + inventory.getProduct().getId());
         cacheManager.invalidate("product:" + inventory.getProduct().getId());
         
         return inventoryMapper.toResponseDTO(updatedInventory);
@@ -123,10 +127,11 @@ public class InventoryService {
             inventoryRepository.delete(inventory);
             cacheManager.invalidate("inventory:" + id);
             cacheManager.invalidate("inventory:product:" + productId);
+            cacheManager.invalidate("inventory:quantity:" + productId);
             cacheManager.invalidate("product:" + productId);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+            throw new ConstraintViolationException(
                     "Cannot delete inventory. It has related dependencies that must be removed first.");
             }
             throw ex;

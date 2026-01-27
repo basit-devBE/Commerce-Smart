@@ -13,6 +13,8 @@ import com.example.Commerce.Repositories.OrderItemsRepository;
 import com.example.Commerce.Repositories.OrderRepository;
 import com.example.Commerce.Repositories.ProductRepository;
 import com.example.Commerce.Repositories.UserRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +33,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final InventoryRepository inventoryRepository;
     private final OrderMapper orderMapper;
-    private final com.example.Commerce.cache.CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
     public OrderService(OrderRepository orderRepository, 
                        OrderItemsRepository orderItemsRepository,
@@ -39,7 +41,7 @@ public class OrderService {
                        UserRepository userRepository,
                        InventoryRepository inventoryRepository,
                        OrderMapper orderMapper,
-                       com.example.Commerce.cache.CacheManager cacheManager) {
+                       CacheManager cacheManager) {
         this.orderRepository = orderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productRepository = productRepository;
@@ -83,6 +85,7 @@ public class OrderService {
             // Invalidate product and inventory caches
             cacheManager.invalidate("product:" + product.getId());
             cacheManager.invalidate("inventory:product:" + product.getId());
+            cacheManager.invalidate("inventory:quantity:" + product.getId());
 
             double itemTotal = product.getPrice() * itemDTO.getQuantity();
             totalAmount += itemTotal;
@@ -171,7 +174,7 @@ public class OrderService {
             cacheManager.invalidate("order:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+            throw new ConstraintViolationException(
                     "Cannot delete order. It has related dependencies that must be removed first.");
             }
             throw ex;

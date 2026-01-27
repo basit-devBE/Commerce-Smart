@@ -6,6 +6,8 @@ import com.example.Commerce.DTOs.UpdateCategoryDTO;
 import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Mappers.CategoryMapper;
 import com.example.Commerce.Repositories.CategoryRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -16,9 +18,9 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-    private final com.example.Commerce.cache.CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
-    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, com.example.Commerce.cache.CacheManager cacheManager) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, CacheManager cacheManager) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
         this.cacheManager = cacheManager;
@@ -72,7 +74,7 @@ public class CategoryService {
             cacheManager.invalidate("category:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+            throw new ConstraintViolationException(
                     "Cannot delete category. It is being used by one or more products. Please remove or reassign the products first.");
             }
             throw ex;
