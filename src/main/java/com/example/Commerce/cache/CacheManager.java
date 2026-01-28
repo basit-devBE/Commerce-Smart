@@ -22,6 +22,7 @@ public class CacheManager {
         this.performanceMonitor = performanceMonitor;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T get(String key, Supplier<T> supplier) {
         CacheEntry entry = cache.get(key);
         
