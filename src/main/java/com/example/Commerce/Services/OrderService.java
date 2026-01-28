@@ -187,6 +187,11 @@ public class OrderService implements IOrderService {
 
     private OrderResponseDTO buildOrderResponse(OrderEntity order, List<OrderItemsEntity> items) {
         OrderResponseDTO response = orderMapper.toResponseDTO(order);
+        
+        // Populate userName
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> response.setUserName(user.getFirstName() + " " + user.getLastName()));
+        
         List<OrderItemResponseDTO> itemResponses = items.stream()
                 .map(item -> {
                     OrderItemResponseDTO itemResponse = orderMapper.toOrderItemResponseDTO(item);

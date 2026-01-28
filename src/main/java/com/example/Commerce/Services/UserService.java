@@ -71,7 +71,9 @@ public class UserService implements IUserService {
         return cacheManager.get("user:email:" + email, () -> {
             UserEntity user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-            return userMapper.toSummaryDTO(user);
+            userSummaryDTO summary = userMapper.toSummaryDTO(user);
+            summary.setName(user.getFirstName() + " " + user.getLastName());
+            return summary;
         });
     }
 
@@ -79,7 +81,9 @@ public class UserService implements IUserService {
         return cacheManager.get("user:" + id, () -> {
             UserEntity user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-            return userMapper.toSummaryDTO(user);
+            userSummaryDTO summary = userMapper.toSummaryDTO(user);
+            summary.setName(user.getFirstName() + " " + user.getLastName());
+            return summary;
         });
     }
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
@@ -96,18 +100,28 @@ public class UserService implements IUserService {
             cacheManager.invalidate("user:email:" + userDTO.getEmail());
         }
         
-        return userMapper.toSummaryDTO(updatedUser);
+        userSummaryDTO summary = userMapper.toSummaryDTO(updatedUser);
+        summary.setName(updatedUser.getFirstName() + " " + updatedUser.getLastName());
+        return summary;
     }
 
     public Page<userSummaryDTO> getAllUsers(Pageable pageable){
         return userRepository.findAll(pageable).map(user -> 
-            cacheManager.get("user:" + user.getId(), () -> userMapper.toSummaryDTO(user))
+            cacheManager.get("user:" + user.getId(), () -> {
+                userSummaryDTO summary = userMapper.toSummaryDTO(user);
+                summary.setName(user.getFirstName() + " " + user.getLastName());
+                return summary;
+            })
         );
     }
 
     public List<userSummaryDTO> getAllUsersList() {
         return userRepository.findAll().stream()
-            .map(user -> cacheManager.get("user:" + user.getId(), () -> userMapper.toSummaryDTO(user)))
+            .map(user -> cacheManager.get("user:" + user.getId(), () -> {
+                userSummaryDTO summary = userMapper.toSummaryDTO(user);
+                summary.setName(user.getFirstName() + " " + user.getLastName());
+                return summary;
+            }))
             .toList();
     }
 

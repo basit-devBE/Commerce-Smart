@@ -73,18 +73,32 @@ public class InventoryRepository implements IInventoryRepository {
 
     public Page<InventoryEntity> findAll(Pageable pageable) {
         List<InventoryEntity> inventories = new ArrayList<>();
-        String sql = "SELECT * FROM inventory LIMIT ? OFFSET ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, pageable.getPageSize());
-            ps.setInt(2, (int) pageable.getOffset());
-            try (ResultSet rs = ps.executeQuery()) {
+        String sql;
+        
+        if (pageable.isPaged()) {
+            sql = "SELECT * FROM inventory LIMIT ? OFFSET ?";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, pageable.getPageSize());
+                ps.setInt(2, (int) pageable.getOffset());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        inventories.add(mapRow(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            sql = "SELECT * FROM inventory";
+            try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     inventories.add(mapRow(rs));
                 }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
+        
         // Get total count
         int total = 0;
         String countSql = "SELECT COUNT(*) FROM inventory";

@@ -8,6 +8,7 @@ public class userSummaryDTO {
     private Long id;
     private String firstName;
     private String lastName;
+    private String name;
     private String email;
     private UserRole role;
 }

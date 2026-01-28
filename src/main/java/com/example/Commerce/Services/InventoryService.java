@@ -49,19 +49,30 @@ public class InventoryService implements IInventoryService {
         inventoryEntity.setLocation(addInventoryDTO.getLocation());
 
         InventoryEntity savedInventory = inventoryRepository.save(inventoryEntity);
-        return inventoryMapper.toResponseDTO(savedInventory);
+        InventoryResponseDTO response = inventoryMapper.toResponseDTO(savedInventory);
+        productRepository.findById(savedInventory.getProductId())
+                .ifPresent(product -> response.setProductName(product.getName()));
+        return response;
     }
 
     public Page<InventoryResponseDTO> getAllInventories(Pageable pageable) {
         return inventoryRepository.findAll(pageable)
-            .map(inventory -> cacheManager.get("inventory:" + inventory.getId(), () -> inventoryMapper.toResponseDTO(inventory)));
+            .map(inventory -> cacheManager.get("inventory:" + inventory.getId(), () -> {
+                InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+                productRepository.findById(inventory.getProductId())
+                        .ifPresent(product -> response.setProductName(product.getName()));
+                return response;
+            }));
     }
 
     public InventoryResponseDTO getInventoryById(Long id) {
         return cacheManager.get("inventory:" + id, () -> {
             InventoryEntity inventory = inventoryRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
-            return inventoryMapper.toResponseDTO(inventory);
+            InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+            productRepository.findById(inventory.getProductId())
+                    .ifPresent(product -> response.setProductName(product.getName()));
+            return response;
         });
     }
 
@@ -72,7 +83,10 @@ public class InventoryService implements IInventoryService {
 
             InventoryEntity inventory = inventoryRepository.findByProductId(productId)
                     .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product ID: " + productId));
-            return inventoryMapper.toResponseDTO(inventory);
+            InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+            productRepository.findById(inventory.getProductId())
+                    .ifPresent(product -> response.setProductName(product.getName()));
+            return response;
         });
     }
 
@@ -99,7 +113,10 @@ public class InventoryService implements IInventoryService {
         cacheManager.invalidate("inventory:quantity:" + existingInventory.getProductId());
         cacheManager.invalidate("product:" + existingInventory.getProductId());
 
-        return inventoryMapper.toResponseDTO(updatedInventory);
+        InventoryResponseDTO response = inventoryMapper.toResponseDTO(updatedInventory);
+        productRepository.findById(updatedInventory.getProductId())
+                .ifPresent(product -> response.setProductName(product.getName()));
+        return response;
     }
 
     public InventoryResponseDTO adjustInventoryQuantity(Long id, Integer quantityChange) {
