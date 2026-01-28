@@ -1,40 +1,20 @@
 package com.example.Commerce.Entities;
 
-
 import com.example.Commerce.Enums.OrderStatus;
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class OrderEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
-
-    @Column(nullable = false)
+    private Long userId;
     private Double totalAmount;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private OrderStatus status;
-
-    @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
 

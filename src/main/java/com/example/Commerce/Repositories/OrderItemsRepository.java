@@ -1,14 +1,13 @@
 package com.example.Commerce.Repositories;
 
 import com.example.Commerce.Entities.OrderItemsEntity;
-import com.example.Commerce.Entities.OrderEntity;
-import com.example.Commerce.Entities.ProductEntity;
+import com.example.Commerce.interfaces.IOrderItemsRepository;
 import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.*;
 
 @Repository
-public class OrderItemsRepository {
+public class OrderItemsRepository implements IOrderItemsRepository {
     private final Connection connection;
 
     public OrderItemsRepository(Connection connection) {
@@ -18,17 +17,8 @@ public class OrderItemsRepository {
     private OrderItemsEntity mapRow(ResultSet rs) throws SQLException {
         OrderItemsEntity item = new OrderItemsEntity();
         item.setId(rs.getLong("id"));
-        OrderEntity order = new OrderEntity();
-        order.setId(rs.getLong("order_id"));
-        item.setOrder(order);
-        ProductEntity product = new ProductEntity();
-        product.setId(rs.getLong("product_id"));
-        try {
-            product.setName(rs.getString("product_name"));
-        } catch (SQLException e) {
-            // ignore if not present
-        }
-        item.setProduct(product);
+        item.setOrderId(rs.getLong("order_id"));
+        item.setProductId(rs.getLong("product_id"));
         item.setQuantity(rs.getInt("quantity"));
         item.setTotalPrice(rs.getDouble("total_price"));
         return item;
@@ -62,8 +52,8 @@ public class OrderItemsRepository {
             if (item.getId() == null) {
                 String sql = "INSERT INTO order_items (order_id, product_id, quantity, total_price) VALUES (?, ?, ?, ?)";
                 try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setLong(1, item.getOrder().getId());
-                    ps.setLong(2, item.getProduct().getId());
+                    ps.setLong(1, item.getOrderId());
+                    ps.setLong(2, item.getProductId());
                     ps.setInt(3, item.getQuantity());
                     ps.setDouble(4, item.getTotalPrice());
                     ps.executeUpdate();
@@ -76,8 +66,8 @@ public class OrderItemsRepository {
             } else {
                 String sql = "UPDATE order_items SET order_id = ?, product_id = ?, quantity = ?, total_price = ? WHERE id = ?";
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                    ps.setLong(1, item.getOrder().getId());
-                    ps.setLong(2, item.getProduct().getId());
+                    ps.setLong(1, item.getOrderId());
+                    ps.setLong(2, item.getProductId());
                     ps.setInt(3, item.getQuantity());
                     ps.setDouble(4, item.getTotalPrice());
                     ps.setLong(5, item.getId());

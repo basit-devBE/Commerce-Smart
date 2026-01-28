@@ -4,10 +4,10 @@ import com.example.Commerce.DTOs.AddInventoryDTO;
 import com.example.Commerce.DTOs.InventoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateInventoryDTO;
 import com.example.Commerce.Entities.InventoryEntity;
-import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.InventoryMapper;
-import com.example.Commerce.Repositories.InventoryRepository;
-import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IInventoryService;
+import com.example.Commerce.interfaces.IProductRepository;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
@@ -17,14 +17,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InventoryService {
-    private final InventoryRepository inventoryRepository;
-    private final ProductRepository productRepository;
+public class InventoryService implements IInventoryService {
+    private final IInventoryRepository inventoryRepository;
+    private final IProductRepository productRepository;
     private final InventoryMapper inventoryMapper;
     private final CacheManager cacheManager;
 
-    public InventoryService(InventoryRepository inventoryRepository, 
-                           ProductRepository productRepository,
+    public InventoryService(IInventoryRepository inventoryRepository, 
+                           IProductRepository productRepository,
                            InventoryMapper inventoryMapper,
                            CacheManager cacheManager) {
         this.inventoryRepository = inventoryRepository;
@@ -35,7 +35,7 @@ public class InventoryService {
 
     public InventoryResponseDTO addInventory(AddInventoryDTO addInventoryDTO) {
         // Validate product exists
-        ProductEntity product = productRepository.findById(addInventoryDTO.getProductId())
+        productRepository.findById(addInventoryDTO.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + addInventoryDTO.getProductId()));
 
         // Check if inventory already exists for this product
@@ -44,7 +44,7 @@ public class InventoryService {
         }
 
         InventoryEntity inventoryEntity = new InventoryEntity();
-        inventoryEntity.setProduct(product);
+        inventoryEntity.setProductId(addInventoryDTO.getProductId());
         inventoryEntity.setQuantity(addInventoryDTO.getQuantity());
         inventoryEntity.setLocation(addInventoryDTO.getLocation());
 
@@ -95,9 +95,9 @@ public class InventoryService {
         InventoryEntity updatedInventory = inventoryRepository.save(existingInventory);
 
         cacheManager.invalidate("inventory:" + id);
-        cacheManager.invalidate("inventory:product:" + existingInventory.getProduct().getId());
-        cacheManager.invalidate("inventory:quantity:" + existingInventory.getProduct().getId());
-        cacheManager.invalidate("product:" + existingInventory.getProduct().getId());
+        cacheManager.invalidate("inventory:product:" + existingInventory.getProductId());
+        cacheManager.invalidate("inventory:quantity:" + existingInventory.getProductId());
+        cacheManager.invalidate("product:" + existingInventory.getProductId());
 
         return inventoryMapper.toResponseDTO(updatedInventory);
     }
@@ -119,7 +119,7 @@ public class InventoryService {
         InventoryEntity inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
         
-        Long productId = inventory.getProduct().getId();
+        Long productId = inventory.getProductId();
         
         try {
             inventoryRepository.delete(inventory);

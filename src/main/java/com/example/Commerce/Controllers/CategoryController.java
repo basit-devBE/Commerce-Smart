@@ -9,7 +9,7 @@ import com.example.Commerce.DTOs.PagedResponse;
 import com.example.Commerce.DTOs.UpdateCategoryDTO;
 import com.example.Commerce.DTOs.ValidationErrorResponse;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.CategoryService;
+import com.example.Commerce.interfaces.ICategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
-    private final CategoryService categoryService;
+    private final ICategoryService categoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(ICategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

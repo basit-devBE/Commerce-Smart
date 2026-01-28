@@ -7,9 +7,10 @@ import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Entities.InventoryEntity;
 import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.ProductMapper;
-import com.example.Commerce.Repositories.CategoryRepository;
-import com.example.Commerce.Repositories.InventoryRepository;
-import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.interfaces.ICategoryRepository;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IProductRepository;
+import com.example.Commerce.interfaces.IProductService;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
@@ -20,14 +21,14 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class ProductService {
-    private final ProductRepository productRepository;
+public class ProductService implements IProductService { 
+    private final IProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final CategoryRepository categoryRepository;
-    private final InventoryRepository inventoryRepository;
+    private final ICategoryRepository categoryRepository;
+    private final IInventoryRepository inventoryRepository;
     private final CacheManager cacheManager;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper, CategoryRepository categoryRepository, InventoryRepository inventoryRepository, CacheManager cacheManager) {
+    public ProductService(IProductRepository productRepository, ProductMapper productMapper, ICategoryRepository categoryRepository, IInventoryRepository inventoryRepository, CacheManager cacheManager) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.categoryRepository = categoryRepository;
@@ -42,10 +43,10 @@ public class ProductService {
         CategoryEntity category = categoryRepository.findById(addProductDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + addProductDTO.getCategoryId()));
         ProductEntity productEntity = productMapper.toEntity(addProductDTO);
-        productEntity.setCategory(category);
+        productEntity.setCategoryId(addProductDTO.getCategoryId());
         ProductEntity savedProduct = productRepository.save(productEntity);
         ProductResponseDTO response =  productMapper.toResponseDTO(savedProduct);
-        response.setCategoryName(savedProduct.getCategory().getName());
+        response.setCategoryName(category.getName());
         
         // Set quantity from inventory if exists
         inventoryRepository.findByProductId(savedProduct.getId())
@@ -88,7 +89,9 @@ public class ProductService {
             ProductEntity product = productRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
             ProductResponseDTO response = productMapper.toResponseDTO(product);
-            response.setCategoryName(product.getCategory().getName());
+            CategoryEntity category = categoryRepository.findById(product.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            response.setCategoryName(category.getName());
             
             inventoryRepository.findByProductId(product.getId())
                     .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));
@@ -108,9 +111,9 @@ public class ProductService {
         }
 
         if(updateProductDTO.getCategoryId() != null) {
-            CategoryEntity category = categoryRepository.findById(updateProductDTO.getCategoryId())
+            categoryRepository.findById(updateProductDTO.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + updateProductDTO.getCategoryId()));
-            existingProduct.setCategory(category);
+            existingProduct.setCategoryId(updateProductDTO.getCategoryId());
         }
 
         productMapper.updateEntity(updateProductDTO, existingProduct);
@@ -120,7 +123,9 @@ public class ProductService {
         cacheManager.invalidate("inventory:quantity:" + id);
         
         ProductResponseDTO response = productMapper.toResponseDTO(updatedProduct);
-        response.setCategoryName(updatedProduct.getCategory().getName());
+        CategoryEntity category = categoryRepository.findById(updatedProduct.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        response.setCategoryName(category.getName());
         
         inventoryRepository.findByProductId(updatedProduct.getId())
                 .ifPresent(inventory -> response.setQuantity(inventory.getQuantity()));

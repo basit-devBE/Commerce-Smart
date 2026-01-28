@@ -4,7 +4,7 @@ package com.example.Commerce.Controllers;
 import com.example.Commerce.Config.RequiresRole;
 import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.UserService;
+import com.example.Commerce.interfaces.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,9 +23,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserService userService;
+    private final IUserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(IUserService userService) {
         this.userService = userService;
     }
     @Operation(

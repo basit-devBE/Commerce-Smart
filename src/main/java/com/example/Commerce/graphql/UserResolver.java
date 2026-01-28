@@ -1,7 +1,7 @@
 package com.example.Commerce.graphql;
 
 import com.example.Commerce.DTOs.userSummaryDTO;
-import com.example.Commerce.Services.UserService;
+import com.example.Commerce.interfaces.IUserService;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -9,9 +9,9 @@ import java.util.List;
 
 @Controller
 public class UserResolver {
-    private final UserService userService;
+    private final IUserService userService;
 
-    public UserResolver(UserService userService) {
+    public UserResolver(IUserService userService) {
         this.userService = userService;
     }
 

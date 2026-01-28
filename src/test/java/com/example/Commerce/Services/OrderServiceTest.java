@@ -4,7 +4,8 @@ import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Entities.*;
 import com.example.Commerce.Enums.OrderStatus;
 import com.example.Commerce.Mappers.OrderMapper;
-import com.example.Commerce.Repositories.*;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.interfaces.*;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,28 +24,31 @@ class OrderServiceTest {
     private OrderService orderService;
 
     @Mock
-    private OrderRepository orderRepository;
+    private IOrderRepository orderRepository;
 
     @Mock
-    private OrderItemsRepository orderItemsRepository;
+    private IOrderItemsRepository orderItemsRepository;
 
     @Mock
-    private ProductRepository productRepository;
+    private IProductRepository productRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
 
     @Mock
-    private InventoryRepository inventoryRepository;
+    private IInventoryRepository inventoryRepository;
 
     @Mock
     private OrderMapper orderMapper;
+
+    @Mock
+    private CacheManager cacheManager;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         orderService = new OrderService(orderRepository, orderItemsRepository, productRepository, 
-                                       userRepository, inventoryRepository, orderMapper);
+                                       userRepository, inventoryRepository, orderMapper, cacheManager);
     }
 
     @Test

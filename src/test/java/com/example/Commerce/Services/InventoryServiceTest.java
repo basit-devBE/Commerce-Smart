@@ -6,8 +6,9 @@ import com.example.Commerce.DTOs.UpdateInventoryDTO;
 import com.example.Commerce.Entities.InventoryEntity;
 import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.InventoryMapper;
-import com.example.Commerce.Repositories.InventoryRepository;
-import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IProductRepository;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,18 +26,21 @@ class InventoryServiceTest {
     private InventoryService inventoryService;
 
     @Mock
-    private InventoryRepository inventoryRepository;
+    private IInventoryRepository inventoryRepository;
 
     @Mock
-    private ProductRepository productRepository;
+    private IProductRepository productRepository;
 
     @Mock
     private InventoryMapper inventoryMapper;
 
+    @Mock
+    private CacheManager cacheManager;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        inventoryService = new InventoryService(inventoryRepository, productRepository, inventoryMapper);
+        inventoryService = new InventoryService(inventoryRepository, productRepository, inventoryMapper, cacheManager);
     }
 
     @Test

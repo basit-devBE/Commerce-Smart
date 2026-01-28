@@ -1,7 +1,7 @@
 package com.example.Commerce.Repositories;
 
-import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Entities.ProductEntity;
+import com.example.Commerce.interfaces.IProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.*;
 
 @Repository
-public class ProductRepository {
+public class ProductRepository implements IProductRepository {
     private final Connection connection;
 
     public ProductRepository(Connection connection) {
@@ -26,14 +26,7 @@ public class ProductRepository {
         product.setAvailable(rs.getBoolean("is_available"));
         product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
-        CategoryEntity category = new CategoryEntity();
-        category.setId(rs.getLong("category_id"));
-        try {
-            category.setName(rs.getString("category_name"));
-        } catch (SQLException e) {
-            // ignore if not present
-        }
-        product.setCategory(category);
+        product.setCategoryId(rs.getLong("category_id"));
         return product;
     }
 
@@ -73,7 +66,7 @@ public class ProductRepository {
                 String sql = "INSERT INTO products (name, category_id, sku, price, is_available, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
                 try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setString(1, product.getName());
-                    ps.setLong(2, product.getCategory().getId());
+                    ps.setLong(2, product.getCategoryId());
                     ps.setString(3, product.getSku());
                     ps.setDouble(4, product.getPrice());
                     ps.setBoolean(5, product.isAvailable());
@@ -88,7 +81,7 @@ public class ProductRepository {
                 String sql = "UPDATE products SET name = ?, category_id = ?, sku = ?, price = ?, is_available = ?, updated_at = NOW() WHERE id = ?";
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
                     ps.setString(1, product.getName());
-                    ps.setLong(2, product.getCategory().getId());
+                    ps.setLong(2, product.getCategoryId());
                     ps.setString(3, product.getSku());
                     ps.setDouble(4, product.getPrice());
                     ps.setBoolean(5, product.isAvailable());

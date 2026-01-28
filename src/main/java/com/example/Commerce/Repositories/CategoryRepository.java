@@ -1,6 +1,7 @@
 package com.example.Commerce.Repositories;
 
 import com.example.Commerce.Entities.CategoryEntity;
+import com.example.Commerce.interfaces.ICategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +10,7 @@ import java.sql.*;
 import java.util.*;
 
 @Repository
-public class CategoryRepository {
+public class CategoryRepository implements ICategoryRepository {
     private final Connection connection;
 
     public CategoryRepository(Connection connection) {

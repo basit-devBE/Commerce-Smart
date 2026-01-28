@@ -1,9 +1,7 @@
-
 package com.example.Commerce.Repositories;
 
 import com.example.Commerce.Entities.InventoryEntity;
-import com.example.Commerce.Entities.ProductEntity;
-
+import com.example.Commerce.interfaces.IInventoryRepository;
 import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.*;
@@ -12,7 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 @Repository
-public class InventoryRepository {
+public class InventoryRepository implements IInventoryRepository {
     private final Connection connection;
 
     public InventoryRepository(Connection connection) {
@@ -22,21 +20,14 @@ public class InventoryRepository {
     private InventoryEntity mapRow(ResultSet rs) throws SQLException {
         InventoryEntity inventory = new InventoryEntity();
         inventory.setId(rs.getLong("id"));
-        ProductEntity product = new ProductEntity();
-        product.setId(rs.getLong("product_id"));
-        try {
-            product.setName(rs.getString("product_name"));
-        } catch (SQLException e) {
-            // ignore if not present
-        }
-        inventory.setProduct(product);
+        inventory.setProductId(rs.getLong("product_id"));
         inventory.setQuantity(rs.getInt("quantity"));
         inventory.setLocation(rs.getString("location"));
         return inventory;
     }
 
     public Optional<InventoryEntity> findByProductId(Long productId) {
-        String sql = "SELECT i.*, p.name as product_name FROM inventory i JOIN products p ON i.product_id = p.id WHERE i.product_id = ?";
+        String sql = "SELECT * FROM inventory WHERE product_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -66,7 +57,7 @@ public class InventoryRepository {
     }
 
     public Optional<InventoryEntity> findById(Long id) {
-        String sql = "SELECT i.*, p.name as product_name FROM inventory i JOIN products p ON i.product_id = p.id WHERE i.id = ?";
+        String sql = "SELECT * FROM inventory WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -82,7 +73,7 @@ public class InventoryRepository {
 
     public Page<InventoryEntity> findAll(Pageable pageable) {
         List<InventoryEntity> inventories = new ArrayList<>();
-        String sql = "SELECT i.*, p.name as product_name FROM inventory i JOIN products p ON i.product_id = p.id LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM inventory LIMIT ? OFFSET ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, pageable.getPageSize());
             ps.setInt(2, (int) pageable.getOffset());
@@ -112,7 +103,7 @@ public class InventoryRepository {
             if (inventory.getId() == null) {
                 String sql = "INSERT INTO inventory (product_id, quantity, location) VALUES (?, ?, ?)";
                 try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setLong(1, inventory.getProduct().getId());
+                    ps.setLong(1, inventory.getProductId());
                     ps.setInt(2, inventory.getQuantity());
                     ps.setString(3, inventory.getLocation());
                     ps.executeUpdate();
@@ -125,7 +116,7 @@ public class InventoryRepository {
             } else {
                 String sql = "UPDATE inventory SET product_id = ?, quantity = ?, location = ? WHERE id = ?";
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                    ps.setLong(1, inventory.getProduct().getId());
+                    ps.setLong(1, inventory.getProductId());
                     ps.setInt(2, inventory.getQuantity());
                     ps.setString(3, inventory.getLocation());
                     ps.setLong(4, inventory.getId());

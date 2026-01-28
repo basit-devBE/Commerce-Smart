@@ -5,7 +5,8 @@ import com.example.Commerce.DTOs.CategoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateCategoryDTO;
 import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Mappers.CategoryMapper;
-import com.example.Commerce.Repositories.CategoryRepository;
+import com.example.Commerce.interfaces.ICategoryRepository;
+import com.example.Commerce.interfaces.ICategoryService;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
@@ -15,12 +16,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CategoryService {
-    private final CategoryRepository categoryRepository;
+public class CategoryService implements ICategoryService {
+    private final ICategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final CacheManager cacheManager;
 
-    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, CacheManager cacheManager) {
+    public CategoryService(ICategoryRepository categoryRepository, CategoryMapper categoryMapper, CacheManager cacheManager) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
         this.cacheManager = cacheManager;

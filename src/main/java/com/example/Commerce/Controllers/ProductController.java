@@ -10,7 +10,7 @@ import com.example.Commerce.DTOs.ProductResponseDTO;
 import com.example.Commerce.DTOs.UpdateProductDTO;
 import com.example.Commerce.DTOs.ValidationErrorResponse;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.ProductService;
+import com.example.Commerce.interfaces.IProductService;
 import com.example.Commerce.utils.sorting.SortingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,10 +30,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-    private final ProductService productService;
+    private final IProductService productService;
     private final SortingService sortingService;
 
-    public ProductController(ProductService productService, SortingService sortingService) {
+    public ProductController(IProductService productService, SortingService sortingService) {
         this.productService = productService;
         this.sortingService = sortingService;
     }

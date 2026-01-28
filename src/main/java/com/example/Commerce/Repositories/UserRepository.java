@@ -2,6 +2,7 @@ package com.example.Commerce.Repositories;
 
 import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.interfaces.IUserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,7 @@ import java.sql.*;
 import java.util.*;
 
 @Repository
-public class UserRepository {
+public class UserRepository implements IUserRepository {
     private final Connection connection;
 
     public UserRepository(Connection connection) {

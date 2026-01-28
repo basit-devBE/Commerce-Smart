@@ -10,12 +10,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-    @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "user.email", target = "userName")
+    @Mapping(source = "userId", target = "userId")
+    @Mapping(target = "userName", ignore = true)
     @Mapping(target = "items", ignore = true)
     OrderResponseDTO toResponseDTO(OrderEntity orderEntity);
 
-    @Mapping(source = "product.id", target = "productId")
-    @Mapping(source = "product.name", target = "productName")
+    @Mapping(source = "productId", target = "productId")
+    @Mapping(target = "productName", ignore = true)
     OrderItemResponseDTO toOrderItemResponseDTO(OrderItemsEntity orderItemsEntity);
 }

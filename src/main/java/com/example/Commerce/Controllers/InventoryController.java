@@ -9,7 +9,7 @@ import com.example.Commerce.DTOs.PagedResponse;
 import com.example.Commerce.DTOs.UpdateInventoryDTO;
 import com.example.Commerce.DTOs.ValidationErrorResponse;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.InventoryService;
+import com.example.Commerce.interfaces.IInventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
-    private final InventoryService inventoryService;
+    private final IInventoryService inventoryService;
 
-    public InventoryController(InventoryService inventoryService) {
+    public InventoryController(IInventoryService inventoryService) {
         this.inventoryService = inventoryService;
     }
 

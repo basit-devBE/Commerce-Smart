@@ -3,7 +3,8 @@ package com.example.Commerce.Services;
 import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Mappers.UserMapper;
-import com.example.Commerce.Repositories.UserRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.interfaces.IUserRepository;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,15 +23,18 @@ class UserServiceTest {
     private UserService userService;
 
     @Mock
-    private UserRepository userRepository;
+    private IUserRepository userRepository;
 
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private CacheManager cacheManager;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        userService = new UserService(userRepository, userMapper);
+        userService = new UserService(userRepository, userMapper, cacheManager);
     }
 
     @Test

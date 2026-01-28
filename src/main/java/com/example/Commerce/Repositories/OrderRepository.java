@@ -1,8 +1,8 @@
 package com.example.Commerce.Repositories;
 
 import com.example.Commerce.Entities.OrderEntity;
-import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Enums.OrderStatus;
+import com.example.Commerce.interfaces.IOrderRepository;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import java.sql.*;
@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Repository
-public class OrderRepository {
+public class OrderRepository implements IOrderRepository {
     private final Connection connection;
 
     public OrderRepository(Connection connection) {
@@ -24,14 +24,7 @@ public class OrderRepository {
     private OrderEntity mapRow(ResultSet rs) throws SQLException {
         OrderEntity order = new OrderEntity();
         order.setId(rs.getLong("id"));
-        UserEntity user = new UserEntity();
-        user.setId(rs.getLong("user_id"));
-        try {
-            user.setEmail(rs.getString("user_email"));
-        } catch (SQLException e) {
-            // ignore if not present
-        }
-        order.setUser(user);
+        order.setUserId(rs.getLong("user_id"));
         order.setTotalAmount(rs.getDouble("total_amount"));
         order.setStatus(OrderStatus.valueOf(rs.getString("status")));
         order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
@@ -50,7 +43,7 @@ public class OrderRepository {
         }
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, userId);
-            if (paged) {
+            if (paged && pageable != null) {
                 ps.setInt(2, pageable.getPageSize());
                 ps.setInt(3, (int) pageable.getOffset());
             }
@@ -76,7 +69,7 @@ public class OrderRepository {
             sql = "SELECT o.*, u.email as user_email FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC";
         }
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            if (paged) {
+            if (paged && pageable != null) {
                 ps.setInt(1, pageable.getPageSize());
                 ps.setInt(2, (int) pageable.getOffset());
             }
@@ -112,7 +105,7 @@ public class OrderRepository {
             if (order.getId() == null) {
                 String sql = "INSERT INTO orders (user_id, total_amount, status, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
                 try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setLong(1, order.getUser().getId());
+                    ps.setLong(1, order.getUserId());
                     ps.setDouble(2, order.getTotalAmount());
                     ps.setString(3, order.getStatus().name());
                     ps.executeUpdate();
@@ -125,7 +118,7 @@ public class OrderRepository {
             } else {
                 String sql = "UPDATE orders SET user_id = ?, total_amount = ?, status = ?, updated_at = NOW() WHERE id = ?";
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                    ps.setLong(1, order.getUser().getId());
+                    ps.setLong(1, order.getUserId());
                     ps.setDouble(2, order.getTotalAmount());
                     ps.setString(3, order.getStatus().name());
                     ps.setLong(4, order.getId());

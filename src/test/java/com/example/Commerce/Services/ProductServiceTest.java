@@ -6,9 +6,10 @@ import com.example.Commerce.DTOs.UpdateProductDTO;
 import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Entities.ProductEntity;
 import com.example.Commerce.Mappers.ProductMapper;
-import com.example.Commerce.Repositories.CategoryRepository;
-import com.example.Commerce.Repositories.InventoryRepository;
-import com.example.Commerce.Repositories.ProductRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.interfaces.ICategoryRepository;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IProductRepository;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,21 +27,24 @@ class ProductServiceTest {
     private ProductService productService;
 
     @Mock
-    private ProductRepository productRepository;
+    private IProductRepository productRepository;
 
     @Mock
     private ProductMapper productMapper;
 
     @Mock
-    private CategoryRepository categoryRepository;
+    private ICategoryRepository categoryRepository;
 
     @Mock
-    private InventoryRepository inventoryRepository;
+    private IInventoryRepository inventoryRepository;
+
+    @Mock
+    private CacheManager cacheManager;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        productService = new ProductService(productRepository, productMapper, categoryRepository, inventoryRepository);
+        productService = new ProductService(productRepository, productMapper, categoryRepository, inventoryRepository, cacheManager);
     }
 
     @Test
@@ -58,7 +62,7 @@ class ProductServiceTest {
         ProductEntity entity = new ProductEntity();
         ProductEntity savedEntity = new ProductEntity();
         savedEntity.setId(1L);
-        savedEntity.setCategory(category);
+        savedEntity.setCategoryId(1L);
         
         ProductResponseDTO responseDTO = new ProductResponseDTO();
         responseDTO.setId(1L);
@@ -105,7 +109,7 @@ class ProductServiceTest {
         
         ProductEntity entity = new ProductEntity();
         entity.setId(1L);
-        entity.setCategory(category);
+        entity.setCategoryId(1L);
         
         ProductResponseDTO responseDTO = new ProductResponseDTO();
         responseDTO.setId(1L);
@@ -137,11 +141,11 @@ class ProductServiceTest {
         ProductEntity existingEntity = new ProductEntity();
         existingEntity.setId(1L);
         existingEntity.setName("Old");
-        existingEntity.setCategory(category);
+        existingEntity.setCategoryId(1L);
         
         ProductEntity updatedEntity = new ProductEntity();
         updatedEntity.setId(1L);
-        updatedEntity.setCategory(category);
+        updatedEntity.setCategoryId(1L);
         
         ProductResponseDTO responseDTO = new ProductResponseDTO();
         responseDTO.setId(1L);
