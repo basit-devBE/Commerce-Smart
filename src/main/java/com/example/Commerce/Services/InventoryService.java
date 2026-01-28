@@ -53,9 +53,8 @@ public class InventoryService {
     }
 
     public Page<InventoryResponseDTO> getAllInventories(Pageable pageable) {
-        return inventoryRepository.findAll(pageable).map(inventory -> 
-            cacheManager.get("inventory:" + inventory.getId(), () -> inventoryMapper.toResponseDTO(inventory))
-        );
+        return inventoryRepository.findAll(pageable)
+            .map(inventory -> cacheManager.get("inventory:" + inventory.getId(), () -> inventoryMapper.toResponseDTO(inventory)));
     }
 
     public InventoryResponseDTO getInventoryById(Long id) {
