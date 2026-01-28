@@ -5,6 +5,8 @@ import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Mappers.UserMapper;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.interfaces.IUserRepository;
+import com.example.Commerce.interfaces.IOrderRepository;
+import com.example.Commerce.interfaces.IOrderItemsRepository;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,10 +34,16 @@ class UserServiceTest {
     @Mock
     private CacheManager cacheManager;
 
+    @Mock
+    private IOrderRepository orderRepository;
+
+    @Mock
+    private IOrderItemsRepository orderItemsRepository;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        userService = new UserService(userRepository, userMapper, cacheManager);
+        userService = new UserService(userRepository, userMapper, cacheManager, orderRepository, orderItemsRepository);
     }
 
     @Test
@@ -185,6 +194,7 @@ class UserServiceTest {
         entity.setId(1L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(orderRepository.findByUserId(1L)).thenReturn(Collections.emptyList());
 
         assertDoesNotThrow(() -> userService.deleteUser(1L));
         verify(userRepository).delete(entity);

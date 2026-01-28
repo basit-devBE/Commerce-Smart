@@ -7,6 +7,8 @@ import com.example.Commerce.Entities.CategoryEntity;
 import com.example.Commerce.Mappers.CategoryMapper;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.interfaces.ICategoryRepository;
+import com.example.Commerce.interfaces.IProductRepository;
+import com.example.Commerce.interfaces.IInventoryRepository;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,10 +34,16 @@ class CategoryServiceTest {
     @Mock
     private CacheManager cacheManager;
 
+    @Mock
+    private IProductRepository productRepository;
+
+    @Mock
+    private IInventoryRepository inventoryRepository;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        categoryService = new CategoryService(categoryRepository, categoryMapper, cacheManager);
+        categoryService = new CategoryService(categoryRepository, categoryMapper, cacheManager, productRepository, inventoryRepository);
     }
 
     @Test
