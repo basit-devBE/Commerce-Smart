@@ -8,7 +8,6 @@ import java.util.List;
 public interface IUserService {
     LoginResponseDTO addUser(UserRegistrationDTO userDTO);
     LoginResponseDTO loginUser(LoginDTO loginDTO);
-    userSummaryDTO findUserByEmail(String email);
     userSummaryDTO findUserById(Long id);
     userSummaryDTO updateUser(Long id, UpdateUserDTO userDTO);
     Page<userSummaryDTO> getAllUsers(Pageable pageable);

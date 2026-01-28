@@ -5,12 +5,15 @@ import com.example.Commerce.DTOs.UpdateUserDTO;
 import com.example.Commerce.DTOs.UserRegistrationDTO;
 import com.example.Commerce.DTOs.userSummaryDTO;
 import com.example.Commerce.Entities.UserEntity;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "token", ignore = true)
     LoginResponseDTO toResponseDTO(UserEntity userEntity);
 
     @Mapping(target = "id", ignore = true)
@@ -25,5 +28,8 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntity(UpdateUserDTO updateDTO, @MappingTarget UserEntity entity);
 }

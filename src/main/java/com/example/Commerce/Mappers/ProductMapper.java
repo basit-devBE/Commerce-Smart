@@ -4,9 +4,11 @@ import com.example.Commerce.DTOs.AddProductDTO;
 import com.example.Commerce.DTOs.ProductResponseDTO;
 import com.example.Commerce.DTOs.UpdateProductDTO;
 import com.example.Commerce.Entities.ProductEntity;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -27,5 +29,6 @@ public interface ProductMapper {
     @Mapping(target = "available", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntity(UpdateProductDTO updateDTO, @MappingTarget ProductEntity entity);
 }

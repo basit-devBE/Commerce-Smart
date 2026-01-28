@@ -2,9 +2,13 @@ package com.example.Commerce.Mappers;
 
 import com.example.Commerce.DTOs.AddCategoryDTO;
 import com.example.Commerce.DTOs.CategoryResponseDTO;
+import com.example.Commerce.DTOs.UpdateCategoryDTO;
 import com.example.Commerce.Entities.CategoryEntity;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
@@ -19,5 +23,6 @@ public interface CategoryMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntity(com.example.Commerce.DTOs.UpdateCategoryDTO updateDTO, @org.mapstruct.MappingTarget CategoryEntity entity);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntity(UpdateCategoryDTO updateDTO, @MappingTarget CategoryEntity entity);
 }

@@ -59,6 +59,22 @@ public class OrderRepository implements IOrderRepository {
         return new PageImpl<>(orders, pageable == null ? Pageable.unpaged() : pageable, total);
     }
 
+    public List<OrderEntity> findByUserId(Long userId) {
+        List<OrderEntity> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return orders;
+    }
+
     public Page<OrderEntity> findAll(Pageable pageable) {
         List<OrderEntity> orders = new ArrayList<>();
         boolean paged = pageable != null && pageable.isPaged();

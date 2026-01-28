@@ -2,9 +2,12 @@ package com.example.Commerce.Services;
 
 import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Entities.UserEntity;
+import com.example.Commerce.Entities.OrderEntity;
 import com.example.Commerce.Mappers.UserMapper;
 import com.example.Commerce.interfaces.IUserRepository;
 import com.example.Commerce.interfaces.IUserService;
+import com.example.Commerce.interfaces.IOrderRepository;
+import com.example.Commerce.interfaces.IOrderItemsRepository;
 import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
@@ -25,11 +28,15 @@ public class UserService implements IUserService {
     private final IUserRepository userRepository;
     private final UserMapper userMapper;
     private final CacheManager cacheManager;
+    private final IOrderRepository orderRepository;
+    private final IOrderItemsRepository orderItemsRepository;
 
-    public UserService(IUserRepository userRepository, UserMapper userMapper, CacheManager cacheManager) {
+    public UserService(IUserRepository userRepository, UserMapper userMapper, CacheManager cacheManager, IOrderRepository orderRepository, IOrderItemsRepository orderItemsRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.cacheManager = cacheManager;
+        this.orderRepository = orderRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
     public LoginResponseDTO addUser(UserRegistrationDTO userDTO){
@@ -67,15 +74,6 @@ public class UserService implements IUserService {
         }
     }
 
-    public userSummaryDTO findUserByEmail(String email){
-        return cacheManager.get("user:email:" + email, () -> {
-            UserEntity user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-            userSummaryDTO summary = userMapper.toSummaryDTO(user);
-            summary.setName(user.getFirstName() + " " + user.getLastName());
-            return summary;
-        });
-    }
 
     public userSummaryDTO findUserById(Long id){
         return cacheManager.get("user:" + id, () -> {
@@ -89,6 +87,13 @@ public class UserService implements IUserService {
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        // Handle name splitting if name is provided
+        if (userDTO.getName() != null && !userDTO.getName().trim().isEmpty()) {
+            String[] nameParts = userDTO.getName().trim().split("\\s+", 2);
+            userDTO.setFirstName(nameParts[0]);
+            userDTO.setLastName(nameParts.length > 1 ? nameParts[1] : "");
+        }
         
         String oldEmail = userEntity.getEmail();
         userMapper.updateEntity(userDTO, userEntity);
@@ -129,6 +134,18 @@ public class UserService implements IUserService {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         String email = userEntity.getEmail();
+        
+        // Get all orders for this user
+        List<OrderEntity> orders = orderRepository.findByUserId(id);
+        
+        // Delete order items and orders
+        for (OrderEntity order : orders) {
+            orderItemsRepository.deleteAll(orderItemsRepository.findByOrderId(order.getId()));
+            orderRepository.delete(order);
+            cacheManager.invalidate("order:" + order.getId());
+        }
+        
+        // Delete the user
         userRepository.delete(userEntity);
         cacheManager.invalidate("user:" + id);
         cacheManager.invalidate("user:email:" + email);
