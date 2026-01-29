@@ -45,17 +45,17 @@ public class CategoryService implements ICategoryService {
     }
 
     public Page<CategoryResponseDTO> getAllCategories(Pageable pageable) {
-        return categoryRepository.findAll(pageable).map(category -> 
-            cacheManager.get("category:" + category.getId(), () -> categoryMapper.toResponseDTO(category))
-        );
+        return categoryRepository.findAll(pageable).map(category -> {
+            CategoryResponseDTO dto = categoryMapper.toResponseDTO(category);
+            cacheManager.get("category:" + category.getId(), () -> category);
+            return dto;
+        });
     }
 
     public CategoryResponseDTO getCategoryById(Long id) {
-        return cacheManager.get("category:" + id, () -> {
-            CategoryEntity category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
-            return categoryMapper.toResponseDTO(category);
-        });
+        CategoryEntity category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
+        return categoryMapper.toResponseDTO(category);
     }
 
     public CategoryResponseDTO updateCategory(Long id, UpdateCategoryDTO updateCategoryDTO) {

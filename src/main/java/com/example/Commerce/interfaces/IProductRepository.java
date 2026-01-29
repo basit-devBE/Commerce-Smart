@@ -11,6 +11,7 @@ public interface IProductRepository {
     Optional<ProductEntity> findById(Long id);
     ProductEntity save(ProductEntity product);
     void delete(ProductEntity product);
+    Page<ProductEntity> findAll(Pageable pageable);
     Page<ProductEntity> findByCategoryId(Long categoryId, Pageable pageable);
     List<ProductEntity> findByCategoryId(Long categoryId);
     Page<ProductEntity> findAllWithInventory(Pageable pageable);

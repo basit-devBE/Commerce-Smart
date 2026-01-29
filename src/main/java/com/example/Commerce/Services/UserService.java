@@ -76,13 +76,11 @@ public class UserService implements IUserService {
 
 
     public userSummaryDTO findUserById(Long id){
-        return cacheManager.get("user:" + id, () -> {
-            UserEntity user = userRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-            userSummaryDTO summary = userMapper.toSummaryDTO(user);
-            summary.setName(user.getFirstName() + " " + user.getLastName());
-            return summary;
-        });
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        userSummaryDTO summary = userMapper.toSummaryDTO(user);
+        summary.setName(user.getFirstName() + " " + user.getLastName());
+        return summary;
     }
     public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)

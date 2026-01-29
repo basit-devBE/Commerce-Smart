@@ -151,6 +151,32 @@ public class ProductRepository implements IProductRepository {
         return products;
     }
 
+    public Page<ProductEntity> findAll(Pageable pageable) {
+        List<ProductEntity> products = new ArrayList<>();
+        String sql = "SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id LIMIT ? OFFSET ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, pageable.getPageSize());
+            ps.setInt(2, (int) pageable.getOffset());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    products.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        long total = 0;
+        String countSql = "SELECT COUNT(*) FROM products";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(countSql)) {
+            if (rs.next()) {
+                total = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return new PageImpl<>(products, pageable, total);
+    }
+
     public Page<ProductEntity> findAllWithInventory(Pageable pageable) {
         List<ProductEntity> products = new ArrayList<>();
         String sql = "SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE EXISTS (SELECT 1 FROM inventory i WHERE i.product_id = p.id) LIMIT ? OFFSET ?";

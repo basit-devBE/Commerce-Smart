@@ -66,28 +66,24 @@ public class InventoryService implements IInventoryService {
     }
 
     public InventoryResponseDTO getInventoryById(Long id) {
-        return cacheManager.get("inventory:" + id, () -> {
-            InventoryEntity inventory = inventoryRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
-            InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
-            productRepository.findById(inventory.getProductId())
-                    .ifPresent(product -> response.setProductName(product.getName()));
-            return response;
-        });
+        InventoryEntity inventory = inventoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
+        InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+        productRepository.findById(inventory.getProductId())
+                .ifPresent(product -> response.setProductName(product.getName()));
+        return response;
     }
 
     public InventoryResponseDTO getInventoryByProductId(Long productId) {
-        return cacheManager.get("inventory:product:" + productId, () -> {
-            productRepository.findById(productId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + productId));
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + productId));
 
-            InventoryEntity inventory = inventoryRepository.findByProductId(productId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product ID: " + productId));
-            InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
-            productRepository.findById(inventory.getProductId())
-                    .ifPresent(product -> response.setProductName(product.getName()));
-            return response;
-        });
+        InventoryEntity inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product ID: " + productId));
+        InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+        productRepository.findById(inventory.getProductId())
+                .ifPresent(product -> response.setProductName(product.getName()));
+        return response;
     }
 
     public InventoryResponseDTO updateInventory(Long id, UpdateInventoryDTO updateInventoryDTO) {

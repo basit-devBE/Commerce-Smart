@@ -140,12 +140,10 @@ public class OrderService implements IOrderService {
     }
 
     public OrderResponseDTO getOrderById(Long id) {
-        return cacheManager.get("order:" + id, () -> {
-            OrderEntity order = orderRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
-            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-            return buildOrderResponse(order, items);
-        });
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
+        List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+        return buildOrderResponse(order, items);
     }
 
     @Transactional

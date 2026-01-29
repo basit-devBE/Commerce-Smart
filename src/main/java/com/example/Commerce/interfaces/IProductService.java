@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface IProductService {
     ProductResponseDTO addProduct(AddProductDTO addProductDTO);
-    Page<ProductResponseDTO> getAllProducts(Pageable pageable);
-    Page<ProductResponseDTO> getProductsByCategory(Long categoryId, Pageable pageable);
+    Page<ProductResponseDTO> getAllProducts(Pageable pageable, boolean isAdmin);
+    Page<ProductResponseDTO> getProductsByCategory(Long categoryId, Pageable pageable, boolean isAdmin);
     ProductResponseDTO getProductById(Long id);
     ProductResponseDTO updateProduct(Long id, UpdateProductDTO updateProductDTO);
     List<ProductResponseDTO> getAllProductsList();

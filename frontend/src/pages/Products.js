@@ -11,6 +11,7 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
   const { addToCart } = useCart();
   const [addedToCart, setAddedToCart] = useState(null);
@@ -31,7 +32,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const params = { page, size: 12 };
+        const params = { page, size: pageSize };
         
         // Add categoryId if a specific category is selected
         if (selectedCategory !== 'all') {
@@ -54,7 +55,7 @@ const Products = () => {
     if (categories.length > 0 || selectedCategory === 'all') {
       fetchProducts();
     }
-  }, [page, selectedCategory, categories]);
+  }, [page, pageSize, selectedCategory, categories]);
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -88,7 +89,7 @@ const Products = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -114,6 +115,20 @@ const Products = () => {
                     {category.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Page Size */}
+            <div>
+              <select
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                value={pageSize}
+                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0); }}
+              >
+                <option value={8}>8 per page</option>
+                <option value={12}>12 per page</option>
+                <option value={24}>24 per page</option>
+                <option value={48}>48 per page</option>
               </select>
             </div>
           </div>
@@ -183,24 +198,40 @@ const Products = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-8">
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 0}
-                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2 text-gray-700">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 bg-white rounded-lg p-4 shadow-sm">
+                <div className="text-sm text-gray-600">
                   Page {page + 1} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= totalPages - 1}
-                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next
-                </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPage(0)}
+                    disabled={page === 0}
+                    className="px-3 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 0}
+                    className="px-4 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page >= totalPages - 1}
+                    className="px-4 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setPage(totalPages - 1)}
+                    disabled={page >= totalPages - 1}
+                    className="px-3 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  >
+                    Last
+                  </button>
+                </div>
               </div>
             )}
           </>
