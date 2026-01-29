@@ -6,11 +6,11 @@ import lombok.Data;
 
 @Data
 public class UpdateUserDTO {
+    private String name;
     private String firstName;
     private String lastName;
     @Email(message = "Invalid email format")
     private String email;
-
-    private UserRole role = UserRole.CUSTOMER;
+    private UserRole role;
 }
 

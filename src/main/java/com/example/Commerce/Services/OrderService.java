@@ -5,14 +5,16 @@ import com.example.Commerce.Entities.InventoryEntity;
 import com.example.Commerce.Entities.OrderEntity;
 import com.example.Commerce.Entities.OrderItemsEntity;
 import com.example.Commerce.Entities.ProductEntity;
-import com.example.Commerce.Entities.UserEntity;
 import com.example.Commerce.Enums.OrderStatus;
 import com.example.Commerce.Mappers.OrderMapper;
-import com.example.Commerce.Repositories.InventoryRepository;
-import com.example.Commerce.Repositories.OrderItemsRepository;
-import com.example.Commerce.Repositories.OrderRepository;
-import com.example.Commerce.Repositories.ProductRepository;
-import com.example.Commerce.Repositories.UserRepository;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IOrderItemsRepository;
+import com.example.Commerce.interfaces.IOrderRepository;
+import com.example.Commerce.interfaces.IOrderService;
+import com.example.Commerce.interfaces.IProductRepository;
+import com.example.Commerce.interfaces.IUserRepository;
+import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,32 +26,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderService {
-    private final OrderRepository orderRepository;
-    private final OrderItemsRepository orderItemsRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-    private final InventoryRepository inventoryRepository;
+public class OrderService implements IOrderService {
+    private final IOrderRepository orderRepository;
+    private final IOrderItemsRepository orderItemsRepository;
+    private final IProductRepository productRepository;
+    private final IUserRepository userRepository;
+    private final IInventoryRepository inventoryRepository;
     private final OrderMapper orderMapper;
+    private final CacheManager cacheManager;
 
-    public OrderService(OrderRepository orderRepository, 
-                       OrderItemsRepository orderItemsRepository,
-                       ProductRepository productRepository,
-                       UserRepository userRepository,
-                       InventoryRepository inventoryRepository,
-                       OrderMapper orderMapper) {
+    public OrderService(IOrderRepository orderRepository, 
+                       IOrderItemsRepository orderItemsRepository,
+                       IProductRepository productRepository,
+                       IUserRepository userRepository,
+                       IInventoryRepository inventoryRepository,
+                       OrderMapper orderMapper,
+                       CacheManager cacheManager) {
         this.orderRepository = orderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.inventoryRepository = inventoryRepository;
         this.orderMapper = orderMapper;
+        this.cacheManager = cacheManager;
     }
 
     @Transactional
     public OrderResponseDTO createOrder(AddOrderDTO addOrderDTO) {
         // Validate user exists
-        UserEntity user = userRepository.findById(addOrderDTO.getUserId())
+        userRepository.findById(addOrderDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + addOrderDTO.getUserId()));
 
         // Calculate total amount, validate products and check inventory
@@ -76,12 +81,17 @@ public class OrderService {
             // Reduce inventory quantity
             inventory.setQuantity(inventory.getQuantity() - itemDTO.getQuantity());
             inventoriesToUpdate.add(inventory);
+            
+            // Invalidate product and inventory caches
+            cacheManager.invalidate("product:" + product.getId());
+            cacheManager.invalidate("inventory:product:" + product.getId());
+            cacheManager.invalidate("inventory:quantity:" + product.getId());
 
             double itemTotal = product.getPrice() * itemDTO.getQuantity();
             totalAmount += itemTotal;
 
             OrderItemsEntity orderItem = new OrderItemsEntity();
-            orderItem.setProduct(product);
+            orderItem.setProductId(product.getId());
             orderItem.setQuantity(itemDTO.getQuantity());
             orderItem.setTotalPrice(itemTotal);
             orderItems.add(orderItem);
@@ -92,14 +102,14 @@ public class OrderService {
 
         // Create and save order
         OrderEntity order = new OrderEntity();
-        order.setUser(user);
+        order.setUserId(addOrderDTO.getUserId());
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.PENDING);
         OrderEntity savedOrder = orderRepository.save(order);
 
         // Save order items
         for (OrderItemsEntity item : orderItems) {
-            item.setOrder(savedOrder);
+            item.setOrderId(savedOrder.getId());
         }
         List<OrderItemsEntity> savedItems = orderItemsRepository.saveAll(orderItems);
 
@@ -108,10 +118,12 @@ public class OrderService {
     }
 
     public Page<OrderResponseDTO> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable).map(order -> {
-            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-            return buildOrderResponse(order, items);
-        });
+        return orderRepository.findAll(pageable).map(order -> 
+            cacheManager.get("order:" + order.getId(), () -> {
+                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                return buildOrderResponse(order, items);
+            })
+        );
     }
 
     public Page<OrderResponseDTO> getOrdersByUserId(Long userId, Pageable pageable) {
@@ -119,10 +131,12 @@ public class OrderService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        return orderRepository.findByUserId(userId, pageable).map(order -> {
-            List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-            return buildOrderResponse(order, items);
-        });
+        return orderRepository.findByUserId(userId, pageable).map(order -> 
+            cacheManager.get("order:" + order.getId(), () -> {
+                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                return buildOrderResponse(order, items);
+            })
+        );
     }
 
     public OrderResponseDTO getOrderById(Long id) {
@@ -137,12 +151,14 @@ public class OrderService {
         OrderEntity order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
 
-        // Only update status if provided
         if (updateOrderDTO.getStatus() != null) {
             order.setStatus(updateOrderDTO.getStatus());
         }
         
         OrderEntity updatedOrder = orderRepository.save(order);
+        
+        cacheManager.invalidate("order:" + id);
+        
         List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(updatedOrder.getId());
         return buildOrderResponse(updatedOrder, items);
     }
@@ -153,15 +169,14 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + id));
 
         try {
-            // Delete order items first
             List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(id);
             orderItemsRepository.deleteAll(items);
-
-            // Delete order
             orderRepository.delete(order);
+            
+            cacheManager.invalidate("order:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-                throw new com.example.Commerce.errorHandlers.ConstraintViolationException(
+            throw new ConstraintViolationException(
                     "Cannot delete order. It has related dependencies that must be removed first.");
             }
             throw ex;
@@ -170,8 +185,18 @@ public class OrderService {
 
     private OrderResponseDTO buildOrderResponse(OrderEntity order, List<OrderItemsEntity> items) {
         OrderResponseDTO response = orderMapper.toResponseDTO(order);
+        
+        // Populate userName
+        userRepository.findById(order.getUserId())
+                .ifPresent(user -> response.setUserName(user.getFirstName() + " " + user.getLastName()));
+        
         List<OrderItemResponseDTO> itemResponses = items.stream()
-                .map(orderMapper::toOrderItemResponseDTO)
+                .map(item -> {
+                    OrderItemResponseDTO itemResponse = orderMapper.toOrderItemResponseDTO(item);
+                    productRepository.findById(item.getProductId())
+                            .ifPresent(product -> itemResponse.setProductName(product.getName()));
+                    return itemResponse;
+                })
                 .collect(Collectors.toList());
         response.setItems(itemResponses);
         return response;

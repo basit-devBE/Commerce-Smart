@@ -2,7 +2,7 @@ package com.example.Commerce.graphql;
 
 import com.example.Commerce.DTOs.AddProductDTO;
 import com.example.Commerce.DTOs.ProductResponseDTO;
-import com.example.Commerce.Services.ProductService;
+import com.example.Commerce.interfaces.IProductService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -12,9 +12,9 @@ import java.util.List;
 
 @Controller
 public class ProductGraphQLController {
-    private final ProductService productService;
+    private final IProductService productService;
 
-    public ProductGraphQLController(ProductService productService) {
+    public ProductGraphQLController(IProductService productService) {
         this.productService = productService;
     }
 

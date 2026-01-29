@@ -5,7 +5,7 @@ import com.example.Commerce.DTOs.OrderItemDTO;
 import com.example.Commerce.DTOs.OrderResponseDTO;
 import com.example.Commerce.DTOs.UpdateOrderDTO;
 import com.example.Commerce.Enums.OrderStatus;
-import com.example.Commerce.Services.OrderService;
+import com.example.Commerce.interfaces.IOrderService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 @Controller
 public class OrderGraphQLController {
-    private final OrderService orderService;
+    private final IOrderService orderService;
 
-    public OrderGraphQLController(OrderService orderService) {
+    public OrderGraphQLController(IOrderService orderService) {
         this.orderService = orderService;
     }
 

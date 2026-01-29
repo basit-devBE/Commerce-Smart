@@ -3,7 +3,7 @@ package com.example.Commerce.graphql;
 import com.example.Commerce.DTOs.AddCategoryDTO;
 import com.example.Commerce.DTOs.CategoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateCategoryDTO;
-import com.example.Commerce.Services.CategoryService;
+import com.example.Commerce.interfaces.ICategoryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -14,9 +14,9 @@ import java.util.List;
 
 @Controller
 public class CategoryGraphQLController {
-    private final CategoryService categoryService;
+    private final ICategoryService categoryService;
 
-    public CategoryGraphQLController(CategoryService categoryService) {
+    public CategoryGraphQLController(ICategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

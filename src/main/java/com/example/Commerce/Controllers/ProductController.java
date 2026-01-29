@@ -10,7 +10,7 @@ import com.example.Commerce.DTOs.ProductResponseDTO;
 import com.example.Commerce.DTOs.UpdateProductDTO;
 import com.example.Commerce.DTOs.ValidationErrorResponse;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.ProductService;
+import com.example.Commerce.interfaces.IProductService;
 import com.example.Commerce.utils.sorting.SortingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,10 +30,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-    private final ProductService productService;
+    private final IProductService productService;
     private final SortingService sortingService;
 
-    public ProductController(ProductService productService, SortingService sortingService) {
+    public ProductController(IProductService productService, SortingService sortingService) {
         this.productService = productService;
         this.sortingService = sortingService;
     }
@@ -60,7 +60,28 @@ public class ProductController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @Operation(summary = "Get all products", description = "Retrieves a paginated list of all products. Optionally filter by category.")
+    @Operation(summary = "Add multiple products", description = "Creates multiple products at once. Requires ADMIN role.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation error", 
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden", 
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @RequiresRole(UserRole.ADMIN)
+    @PostMapping("/add/bulk")
+    public ResponseEntity<ApiResponse<List<ProductResponseDTO>>> addProducts(@Valid @RequestBody List<AddProductDTO> requests){
+        List<ProductResponseDTO> products = requests.stream()
+            .map(productService::addProduct)
+            .toList();
+        ApiResponse<List<ProductResponseDTO>> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), 
+            products.size() + " products added successfully", products);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @Operation(summary = "Get all products", description = "Retrieves a paginated list of all products. Optionally filter by category. Admins see all products, users see only products with inventory.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products retrieved successfully"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Category not found", 
@@ -70,6 +91,7 @@ public class ProductController {
     })
     @GetMapping("/public/all")
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponseDTO>>> getAllProducts(
+            @RequestAttribute(value = "authenticatedUserRole", required = false) String userRole,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
@@ -80,10 +102,12 @@ public class ProductController {
         Pageable pageable = Pageable.ofSize(size).withPage(page);
         Page<ProductResponseDTO> products;
         
+        boolean isAdmin = "ADMIN".equals(userRole);
+        
         if (categoryId != null) {
-            products = productService.getProductsByCategory(categoryId, pageable);
+            products = productService.getProductsByCategory(categoryId, pageable, isAdmin);
         } else {
-            products = productService.getAllProducts(pageable);
+            products = productService.getAllProducts(pageable, isAdmin);
         }
         
         List<ProductResponseDTO> productList = products.getContent();

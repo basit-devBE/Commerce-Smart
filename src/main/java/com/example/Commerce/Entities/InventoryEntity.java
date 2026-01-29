@@ -1,26 +1,14 @@
 package com.example.Commerce.Entities;
 
-import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "inventory")
 public class InventoryEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private ProductEntity product;
-
-    @Column(nullable = false)
+    private Long productId;
     private Integer quantity;
-
-    @Column(nullable = false)
     private String location;
 }

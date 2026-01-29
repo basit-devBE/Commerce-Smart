@@ -3,7 +3,7 @@ package com.example.Commerce.Controllers;
 import com.example.Commerce.Config.RequiresRole;
 import com.example.Commerce.DTOs.*;
 import com.example.Commerce.Enums.UserRole;
-import com.example.Commerce.Services.OrderService;
+import com.example.Commerce.interfaces.IOrderService;
 import com.example.Commerce.utils.sorting.SortingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,10 +24,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-    private final OrderService orderService;
+    private final IOrderService orderService;
     private final SortingService sortingService;
 
-    public OrderController(OrderService orderService, SortingService sortingService) {
+    public OrderController(IOrderService orderService, SortingService sortingService) {
         this.orderService = orderService;
         this.sortingService = sortingService;
     }

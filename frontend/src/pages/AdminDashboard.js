@@ -18,6 +18,8 @@ const AdminDashboard = () => {
   const [newQuantity, setNewQuantity] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [newUserData, setNewUserData] = useState({});
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
   const [showAddInventoryModal, setShowAddInventoryModal] = useState(false);
@@ -173,6 +175,50 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateProduct = async (productId, data) => {
+    try {
+      await productAPI.update(productId, data);
+      setEditingProduct(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('Failed to update product');
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await productAPI.delete(productId);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product');
+    }
+  };
+
+  const handleUpdateCategory = async (categoryId, data) => {
+    try {
+      await categoryAPI.update(categoryId, data);
+      setEditingCategory(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating category:', error);
+      alert('Failed to update category');
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    try {
+      await categoryAPI.delete(categoryId);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Failed to delete category');
+    }
+  };
+
   const tabs = [
     { id: 'products', name: 'Products' },
     { id: 'categories', name: 'Categories' },
@@ -264,10 +310,16 @@ const AdminDashboard = () => {
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button className="text-primary-600 hover:text-primary-900 mr-3">
+                                <button 
+                                  onClick={() => setEditingProduct(product)}
+                                  className="text-primary-600 hover:text-primary-900 mr-3"
+                                >
                                   <PencilIcon className="h-5 w-5" />
                                 </button>
-                                <button className="text-red-600 hover:text-red-900">
+                                <button 
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
                                   <TrashIcon className="h-5 w-5" />
                                 </button>
                               </td>
@@ -298,10 +350,16 @@ const AdminDashboard = () => {
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
                             <div className="flex gap-2">
-                              <button className="text-primary-600 hover:text-primary-900">
+                              <button 
+                                onClick={() => setEditingCategory(category)}
+                                className="text-primary-600 hover:text-primary-900"
+                              >
                                 <PencilIcon className="h-5 w-5" />
                               </button>
-                              <button className="text-red-600 hover:text-red-900">
+                              <button 
+                                onClick={() => handleDeleteCategory(category.id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
                                 <TrashIcon className="h-5 w-5" />
                               </button>
                             </div>
@@ -766,6 +824,116 @@ const AdminDashboard = () => {
                     setShowAddProductModal(false);
                     setNewProduct({ name: '', categoryId: '', price: '', sku: '', description: '' });
                   }}
+                  className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {editingProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Edit Product</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdateProduct(editingProduct.id, editingProduct);
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    required
+                    value={editingProduct.categoryId}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, categoryId: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={editingProduct.price}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">
+                  Update Product
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Category Modal */}
+      {editingCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Edit Category</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdateCategory(editingCategory.id, editingCategory);
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCategory.name}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    required
+                    value={editingCategory.description}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    rows="3"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700">
+                  Update Category
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(null)}
                   className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300"
                 >
                   Cancel

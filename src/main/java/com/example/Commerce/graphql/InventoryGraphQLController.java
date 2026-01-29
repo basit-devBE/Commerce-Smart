@@ -3,7 +3,7 @@ package com.example.Commerce.graphql;
 import com.example.Commerce.DTOs.AddInventoryDTO;
 import com.example.Commerce.DTOs.InventoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateInventoryDTO;
-import com.example.Commerce.Services.InventoryService;
+import com.example.Commerce.interfaces.IInventoryService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -14,9 +14,9 @@ import java.util.List;
 
 @Controller
 public class InventoryGraphQLController {
-    private final InventoryService inventoryService;
+    private final IInventoryService inventoryService;
 
-    public InventoryGraphQLController(InventoryService inventoryService) {
+    public InventoryGraphQLController(IInventoryService inventoryService) {
         this.inventoryService = inventoryService;
     }
 
