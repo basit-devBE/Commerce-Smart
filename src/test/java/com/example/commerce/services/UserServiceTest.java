@@ -7,8 +7,7 @@ import com.example.commerce.cache.CacheManager;
 import com.example.commerce.interfaces.IUserRepository;
 import com.example.commerce.interfaces.IOrderRepository;
 import com.example.commerce.interfaces.IOrderItemsRepository;
-import com.example.commerce.errorHandlers.ResourceAlreadyExists;
-import com.example.commerce.errorHandlers.ResourceNotFoundException;
+import com.example.commerce.errorhandlers.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
@@ -146,13 +145,13 @@ class UserServiceTest {
         UserEntity entity = new UserEntity();
         entity.setId(1L);
         
-        userSummaryDTO summaryDTO = new userSummaryDTO();
+        UserSummaryDTO summaryDTO = new UserSummaryDTO();
         summaryDTO.setId(1L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(userMapper.toSummaryDTO(entity)).thenReturn(summaryDTO);
 
-        userSummaryDTO result = userService.findUserById(1L);
+        UserSummaryDTO result = userService.findUserById(1L);
 
         assertNotNull(result);
     }
@@ -175,14 +174,14 @@ class UserServiceTest {
         UserEntity updatedEntity = new UserEntity();
         updatedEntity.setId(1L);
         
-        userSummaryDTO summaryDTO = new userSummaryDTO();
+        UserSummaryDTO summaryDTO = new UserSummaryDTO();
         summaryDTO.setId(1L);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingEntity));
         when(userRepository.save(existingEntity)).thenReturn(updatedEntity);
         when(userMapper.toSummaryDTO(updatedEntity)).thenReturn(summaryDTO);
 
-        userSummaryDTO result = userService.updateUser(1L, updateDTO);
+        UserSummaryDTO result = userService.updateUser(1L, updateDTO);
 
         assertNotNull(result);
         verify(userMapper).updateEntity(updateDTO, existingEntity);
