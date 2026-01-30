@@ -1,6 +1,6 @@
-package com.example.Commerce.Config;
+package com.example.Commerce.config;
 
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.enums.UserRole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

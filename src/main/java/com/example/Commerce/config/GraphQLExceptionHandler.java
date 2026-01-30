@@ -1,4 +1,4 @@
-package com.example.Commerce.Config;
+package com.example.Commerce.config;
 
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
 import com.example.Commerce.errorHandlers.UnauthorizedException;

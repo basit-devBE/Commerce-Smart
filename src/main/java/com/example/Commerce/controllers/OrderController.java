@@ -1,8 +1,8 @@
-package com.example.Commerce.Controllers;
+package com.example.Commerce.controllers;
 
 import com.example.Commerce.config.RequiresRole;
-import com.example.Commerce.DTOs.*;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.dtos.*;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IOrderService;
 import com.example.Commerce.utils.sorting.SortingService;
 import io.swagger.v3.oas.annotations.Operation;

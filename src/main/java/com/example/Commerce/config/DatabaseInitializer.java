@@ -1,4 +1,4 @@
-package com.example.Commerce.Config;
+package com.example.Commerce.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

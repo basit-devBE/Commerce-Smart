@@ -1,6 +1,6 @@
 package com.example.Commerce.interfaces;
 
-import com.example.Commerce.Entities.UserEntity;
+import com.example.Commerce.entities.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;

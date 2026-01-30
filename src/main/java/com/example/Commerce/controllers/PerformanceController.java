@@ -1,9 +1,9 @@
-package com.example.Commerce.Controllers;
+package com.example.Commerce.controllers;
 
 import com.example.Commerce.aspects.PerformanceMonitoringAspect;
 import com.example.Commerce.config.RequiresRole;
-import com.example.Commerce.DTOs.ApiResponse;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.dtos.ApiResponse;
+import com.example.Commerce.enums.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;

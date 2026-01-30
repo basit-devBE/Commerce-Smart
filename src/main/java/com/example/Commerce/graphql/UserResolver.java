@@ -1,10 +1,11 @@
 package com.example.Commerce.graphql;
 
-import com.example.Commerce.Config.GraphQLRequiresRole;
-import com.example.Commerce.DTOs.*;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.config.GraphQLRequiresRole;
+import com.example.Commerce.dtos.*;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IUserService;
 import graphql.schema.DataFetchingEnvironment;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -23,7 +24,7 @@ public class UserResolver {
     @QueryMapping
     @GraphQLRequiresRole(UserRole.ADMIN)
     public List<userSummaryDTO> getAllUsers(DataFetchingEnvironment env) {
-        return userService.getAllUsersList();
+        return userService.getAllUsers(Pageable.unpaged()).getContent();
     }
 
     @MutationMapping

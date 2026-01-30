@@ -1,4 +1,4 @@
-package com.example.Commerce.DTOs;
+package com.example.Commerce.dtos;
 
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;

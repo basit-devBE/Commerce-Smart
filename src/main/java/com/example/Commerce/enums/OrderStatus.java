@@ -1,4 +1,4 @@
-package com.example.Commerce.Enums;
+package com.example.Commerce.enums;
 
 public enum OrderStatus {
     PENDING,

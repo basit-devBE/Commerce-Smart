@@ -1,4 +1,4 @@
-package com.example.Commerce.Services;
+package com.example.Commerce.services;
 
 import com.example.Commerce.dtos.AddCategoryDTO;
 import com.example.Commerce.dtos.CategoryResponseDTO;

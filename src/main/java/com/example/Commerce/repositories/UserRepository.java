@@ -1,4 +1,4 @@
-package com.example.Commerce.Repositories;
+package com.example.Commerce.repositories;
 
 import com.example.Commerce.entities.UserEntity;
 import com.example.Commerce.enums.UserRole;

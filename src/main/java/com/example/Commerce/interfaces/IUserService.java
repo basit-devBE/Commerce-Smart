@@ -1,9 +1,8 @@
 package com.example.Commerce.interfaces;
 
-import com.example.Commerce.DTOs.*;
+import com.example.Commerce.dtos.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import java.util.List;
 
 public interface IUserService {
     LoginResponseDTO addUser(UserRegistrationDTO userDTO);
@@ -11,6 +10,5 @@ public interface IUserService {
     userSummaryDTO findUserById(Long id);
     userSummaryDTO updateUser(Long id, UpdateUserDTO userDTO);
     Page<userSummaryDTO> getAllUsers(Pageable pageable);
-    List<userSummaryDTO> getAllUsersList();
     void deleteUser(Long id);
 }

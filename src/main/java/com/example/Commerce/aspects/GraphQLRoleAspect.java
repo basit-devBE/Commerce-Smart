@@ -1,7 +1,7 @@
-package com.example.Commerce.Aspects;
+package com.example.Commerce.aspects;
 
-import com.example.Commerce.Config.GraphQLRequiresRole;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.config.GraphQLRequiresRole;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.errorHandlers.UnauthorizedException;
 import graphql.schema.DataFetchingEnvironment;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GraphQLRoleAspect {
 
-    @Around("@annotation(com.example.Commerce.Config.GraphQLRequiresRole)")
+    @Around("@annotation(com.example.Commerce.config.GraphQLRequiresRole)")
     public Object checkRole(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         GraphQLRequiresRole annotation = signature.getMethod().getAnnotation(GraphQLRequiresRole.class);

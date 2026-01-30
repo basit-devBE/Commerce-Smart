@@ -1,9 +1,9 @@
 package com.example.Commerce.graphql;
 
-import com.example.Commerce.Config.GraphQLRequiresRole;
-import com.example.Commerce.DTOs.AddProductDTO;
-import com.example.Commerce.DTOs.ProductResponseDTO;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.config.GraphQLRequiresRole;
+import com.example.Commerce.dtos.AddProductDTO;
+import com.example.Commerce.dtos.ProductResponseDTO;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IProductService;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.graphql.data.method.annotation.Argument;

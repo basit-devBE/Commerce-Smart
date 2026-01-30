@@ -1,6 +1,6 @@
 package com.example.Commerce.interfaces;
 
-import com.example.Commerce.Entities.OrderItemsEntity;
+import com.example.Commerce.entities.OrderItemsEntity;
 import java.util.List;
 
 public interface IOrderItemsRepository {

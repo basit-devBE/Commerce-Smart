@@ -1,4 +1,4 @@
-package com.example.Commerce.Repositories;
+package com.example.Commerce.repositories;
 
 import com.example.Commerce.entities.CategoryEntity;
 import com.example.Commerce.interfaces.ICategoryRepository;

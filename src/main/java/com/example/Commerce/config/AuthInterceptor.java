@@ -1,8 +1,8 @@
-package com.example.Commerce.Config;
+package com.example.Commerce.config;
 
 
-import com.example.Commerce.Entities.UserEntity;
-import com.example.Commerce.Repositories.UserRepository;
+import com.example.Commerce.entities.UserEntity;
+import com.example.Commerce.repositories.UserRepository;
 import com.example.Commerce.errorHandlers.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package com.example.Commerce.DTOs;
+package com.example.Commerce.dtos;
 
 import java.util.List;
 

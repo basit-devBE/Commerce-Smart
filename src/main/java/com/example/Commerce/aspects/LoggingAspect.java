@@ -1,4 +1,4 @@
-package com.example.Commerce.Aspects;
+package com.example.Commerce.aspects;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 @Slf4j
 public class LoggingAspect {
 
-    @Pointcut("within(com.example.Commerce.Controllers..*)")
+    @Pointcut("within(com.example.Commerce.controllers..*)")
     public void controllerLayer() {}
 
     @Around("controllerLayer()")

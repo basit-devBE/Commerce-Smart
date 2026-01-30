@@ -1,10 +1,10 @@
 package com.example.Commerce.graphql;
 
-import com.example.Commerce.Config.GraphQLRequiresRole;
-import com.example.Commerce.DTOs.AddInventoryDTO;
-import com.example.Commerce.DTOs.InventoryResponseDTO;
-import com.example.Commerce.DTOs.UpdateInventoryDTO;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.config.GraphQLRequiresRole;
+import com.example.Commerce.dtos.AddInventoryDTO;
+import com.example.Commerce.dtos.InventoryResponseDTO;
+import com.example.Commerce.dtos.UpdateInventoryDTO;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IInventoryService;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.data.domain.Pageable;

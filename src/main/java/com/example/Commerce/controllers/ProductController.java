@@ -1,13 +1,13 @@
-package com.example.Commerce.Controllers;
+package com.example.Commerce.controllers;
 
 
 import com.example.Commerce.config.RequiresRole;
-import com.example.Commerce.DTOs.AddProductDTO;
-import com.example.Commerce.DTOs.ApiResponse;
-import com.example.Commerce.DTOs.PagedResponse;
-import com.example.Commerce.DTOs.ProductResponseDTO;
-import com.example.Commerce.DTOs.UpdateProductDTO;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.dtos.AddProductDTO;
+import com.example.Commerce.dtos.ApiResponse;
+import com.example.Commerce.dtos.PagedResponse;
+import com.example.Commerce.dtos.ProductResponseDTO;
+import com.example.Commerce.dtos.UpdateProductDTO;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IProductService;
 import com.example.Commerce.utils.sorting.SortingService;
 import io.swagger.v3.oas.annotations.Operation;

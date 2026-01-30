@@ -1,7 +1,7 @@
-package com.example.Commerce.DTOs;
+package com.example.Commerce.dtos;
 
 
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

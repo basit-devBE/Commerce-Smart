@@ -1,6 +1,6 @@
-package com.example.Commerce.Entities;
+package com.example.Commerce.entities;
 
-import com.example.Commerce.Enums.OrderStatus;
+import com.example.Commerce.enums.OrderStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

@@ -1,10 +1,10 @@
 package com.example.Commerce.graphql;
 
-import com.example.Commerce.Config.GraphQLRequiresRole;
-import com.example.Commerce.DTOs.AddCategoryDTO;
-import com.example.Commerce.DTOs.CategoryResponseDTO;
-import com.example.Commerce.DTOs.UpdateCategoryDTO;
-import com.example.Commerce.Enums.UserRole;
+import com.example.Commerce.config.GraphQLRequiresRole;
+import com.example.Commerce.dtos.AddCategoryDTO;
+import com.example.Commerce.dtos.CategoryResponseDTO;
+import com.example.Commerce.dtos.UpdateCategoryDTO;
+import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.ICategoryService;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.data.domain.Pageable;

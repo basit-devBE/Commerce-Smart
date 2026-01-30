@@ -1,4 +1,4 @@
-package com.example.Commerce.Mappers;
+package com.example.Commerce.mappers;
 
 import com.example.Commerce.dtos.OrderItemResponseDTO;
 import com.example.Commerce.dtos.OrderResponseDTO;
