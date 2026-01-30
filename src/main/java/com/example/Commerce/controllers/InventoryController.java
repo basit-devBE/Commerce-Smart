@@ -1,11 +1,7 @@
 package com.example.Commerce.controllers;
 
 import com.example.Commerce.config.RequiresRole;
-import com.example.Commerce.dtos.AddInventoryDTO;
-import com.example.Commerce.dtos.ApiResponse;
-import com.example.Commerce.dtos.InventoryResponseDTO;
-import com.example.Commerce.dtos.PagedResponse;
-import com.example.Commerce.dtos.UpdateInventoryDTO;
+import com.example.Commerce.dtos.*;
 import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IInventoryService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,7 +1,10 @@
 package com.example.Commerce.entities;
 
 import com.example.Commerce.enums.UserRole;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 

@@ -1,21 +1,16 @@
 package com.example.Commerce.services;
 
+import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.dtos.*;
 import com.example.Commerce.entities.InventoryEntity;
 import com.example.Commerce.entities.OrderEntity;
 import com.example.Commerce.entities.OrderItemsEntity;
 import com.example.Commerce.entities.ProductEntity;
 import com.example.Commerce.enums.OrderStatus;
-import com.example.Commerce.mappers.OrderMapper;
-import com.example.Commerce.interfaces.IInventoryRepository;
-import com.example.Commerce.interfaces.IOrderItemsRepository;
-import com.example.Commerce.interfaces.IOrderRepository;
-import com.example.Commerce.interfaces.IOrderService;
-import com.example.Commerce.interfaces.IProductRepository;
-import com.example.Commerce.interfaces.IUserRepository;
-import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorhandlers.ConstraintViolationException;
 import com.example.Commerce.errorhandlers.ResourceNotFoundException;
+import com.example.Commerce.interfaces.*;
+import com.example.Commerce.mappers.OrderMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,13 +30,13 @@ public class OrderService implements IOrderService {
     private final OrderMapper orderMapper;
     private final CacheManager cacheManager;
 
-    public OrderService(IOrderRepository orderRepository, 
-                       IOrderItemsRepository orderItemsRepository,
-                       IProductRepository productRepository,
-                       IUserRepository userRepository,
-                       IInventoryRepository inventoryRepository,
-                       OrderMapper orderMapper,
-                       CacheManager cacheManager) {
+    public OrderService(IOrderRepository orderRepository,
+                        IOrderItemsRepository orderItemsRepository,
+                        IProductRepository productRepository,
+                        IUserRepository userRepository,
+                        IInventoryRepository inventoryRepository,
+                        OrderMapper orderMapper,
+                        CacheManager cacheManager) {
         this.orderRepository = orderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.productRepository = productRepository;
@@ -81,7 +76,7 @@ public class OrderService implements IOrderService {
             // Reduce inventory quantity
             inventory.setQuantity(inventory.getQuantity() - itemDTO.getQuantity());
             inventoriesToUpdate.add(inventory);
-            
+
             // Invalidate product and inventory caches
             cacheManager.invalidate("product:" + product.getId());
             cacheManager.invalidate("inventory:product:" + product.getId());
@@ -118,11 +113,11 @@ public class OrderService implements IOrderService {
     }
 
     public Page<OrderResponseDTO> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable).map(order -> 
-            cacheManager.get("order:" + order.getId(), () -> {
-                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-                return buildOrderResponse(order, items);
-            })
+        return orderRepository.findAll(pageable).map(order ->
+                cacheManager.get("order:" + order.getId(), () -> {
+                    List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                    return buildOrderResponse(order, items);
+                })
         );
     }
 
@@ -131,11 +126,11 @@ public class OrderService implements IOrderService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        return orderRepository.findByUserId(userId, pageable).map(order -> 
-            cacheManager.get("order:" + order.getId(), () -> {
-                List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
-                return buildOrderResponse(order, items);
-            })
+        return orderRepository.findByUserId(userId, pageable).map(order ->
+                cacheManager.get("order:" + order.getId(), () -> {
+                    List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(order.getId());
+                    return buildOrderResponse(order, items);
+                })
         );
     }
 
@@ -154,11 +149,11 @@ public class OrderService implements IOrderService {
         if (updateOrderDTO.getStatus() != null) {
             order.setStatus(updateOrderDTO.getStatus());
         }
-        
+
         OrderEntity updatedOrder = orderRepository.save(order);
-        
+
         cacheManager.invalidate("order:" + id);
-        
+
         List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(updatedOrder.getId());
         return buildOrderResponse(updatedOrder, items);
     }
@@ -172,12 +167,12 @@ public class OrderService implements IOrderService {
             List<OrderItemsEntity> items = orderItemsRepository.findByOrderId(id);
             orderItemsRepository.deleteAll(items);
             orderRepository.delete(order);
-            
+
             cacheManager.invalidate("order:" + id);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-            throw new ConstraintViolationException(
-                    "Cannot delete order. It has related dependencies that must be removed first.");
+                throw new ConstraintViolationException(
+                        "Cannot delete order. It has related dependencies that must be removed first.");
             }
             throw ex;
         }
@@ -185,11 +180,11 @@ public class OrderService implements IOrderService {
 
     private OrderResponseDTO buildOrderResponse(OrderEntity order, List<OrderItemsEntity> items) {
         OrderResponseDTO response = orderMapper.toResponseDTO(order);
-        
+
         // Populate userName
         userRepository.findById(order.getUserId())
                 .ifPresent(user -> response.setUserName(user.getFirstName() + " " + user.getLastName()));
-        
+
         List<OrderItemResponseDTO> itemResponses = items.stream()
                 .map(item -> {
                     OrderItemResponseDTO itemResponse = orderMapper.toOrderItemResponseDTO(item);

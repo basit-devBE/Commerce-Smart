@@ -32,7 +32,7 @@ public class CategoryGraphQLController {
     public CategoryResponseDTO categoryById(@Argument Long id) {
         return categoryService.getCategoryById(id);
     }
- 
+
     @MutationMapping
     @GraphQLRequiresRole(UserRole.ADMIN)
     public CategoryResponseDTO addCategory(@Argument AddCategoryInput input, DataFetchingEnvironment env) {
@@ -58,6 +58,9 @@ public class CategoryGraphQLController {
         return true;
     }
 
-    public record AddCategoryInput(String name, String description) {}
-    public record UpdateCategoryInput(String name, String description) {}
+    public record AddCategoryInput(String name, String description) {
+    }
+
+    public record UpdateCategoryInput(String name, String description) {
+    }
 }

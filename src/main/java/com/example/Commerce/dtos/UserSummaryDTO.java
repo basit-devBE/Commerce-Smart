@@ -1,7 +1,7 @@
 package com.example.Commerce.dtos;
 
 import com.example.Commerce.enums.UserRole;
-import lombok.Data; 
+import lombok.Data;
 
 @Data
 public class UserSummaryDTO {

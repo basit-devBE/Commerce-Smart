@@ -2,8 +2,8 @@ package com.example.Commerce.config;
 
 
 import com.example.Commerce.entities.UserEntity;
-import com.example.Commerce.repositories.UserRepository;
 import com.example.Commerce.errorhandlers.UnauthorizedException;
+import com.example.Commerce.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,29 +22,29 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, Object handler) throws Exception{
+    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, Object handler) throws Exception {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
-        
+
         String requestURI = request.getRequestURI();
         boolean isPublicEndpoint = requestURI.contains("/public/");
-        
+
         String authHeader = request.getHeader("Authorization");
         log.info("Auth Header: {}", authHeader);
-        
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             if (isPublicEndpoint) {
                 return true;
             }
             throw new UnauthorizedException("Missing or invalid Authorization header");
         }
-        
+
         String token = authHeader.substring(7);
 
-        try{
+        try {
             String[] parts = token.split("-");
-            if(parts.length != 2){
+            if (parts.length != 2) {
                 if (isPublicEndpoint) {
                     return true;
                 }
@@ -52,21 +52,21 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
             String userId = parts[1];
             UserEntity user = userRepository.findById(Long.parseLong(userId))
-                .orElseThrow(() -> new UnauthorizedException("Invalid token - user not found"));
+                    .orElseThrow(() -> new UnauthorizedException("Invalid token - user not found"));
             request.setAttribute("authenticatedUserId", user.getId());
             request.setAttribute("authenticatedUserRole", user.getRole().name());
             return true;
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             if (isPublicEndpoint) {
                 return true;
             }
             throw new UnauthorizedException("Invalid token format");
-        }catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             if (isPublicEndpoint) {
                 return true;
             }
             throw e;
-        }catch (Exception e){
+        } catch (Exception e) {
             if (isPublicEndpoint) {
                 return true;
             }

@@ -49,5 +49,6 @@ public class ProductGraphQLController {
         return true;
     }
 
-    public record AddProductInput(String name, Long categoryId, String sku, Double price) {}
+    public record AddProductInput(String name, Long categoryId, String sku, Double price) {
+    }
 }

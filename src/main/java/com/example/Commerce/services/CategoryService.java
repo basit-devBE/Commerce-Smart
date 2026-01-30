@@ -1,18 +1,18 @@
 package com.example.Commerce.services;
 
+import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.dtos.AddCategoryDTO;
 import com.example.Commerce.dtos.CategoryResponseDTO;
 import com.example.Commerce.dtos.UpdateCategoryDTO;
 import com.example.Commerce.entities.CategoryEntity;
 import com.example.Commerce.entities.ProductEntity;
-import com.example.Commerce.mappers.CategoryMapper;
-import com.example.Commerce.interfaces.ICategoryRepository;
-import com.example.Commerce.interfaces.ICategoryService;
-import com.example.Commerce.interfaces.IProductRepository;
-import com.example.Commerce.interfaces.IInventoryRepository;
-import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorhandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorhandlers.ResourceNotFoundException;
+import com.example.Commerce.interfaces.ICategoryRepository;
+import com.example.Commerce.interfaces.ICategoryService;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IProductRepository;
+import com.example.Commerce.mappers.CategoryMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -70,19 +70,19 @@ public class CategoryService implements ICategoryService {
 
         categoryMapper.updateEntity(updateCategoryDTO, existingCategory);
         CategoryEntity updatedCategory = categoryRepository.save(existingCategory);
-        
+
         cacheManager.invalidate("category:" + id);
-        
+
         return categoryMapper.toResponseDTO(updatedCategory);
     }
 
     public void deleteCategory(Long id) {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
-        
+
         // Get all products in this category
         List<ProductEntity> products = productRepository.findByCategoryId(id);
-        
+
         // Delete inventory and products
         for (ProductEntity product : products) {
             // Delete inventory for this product
@@ -93,12 +93,12 @@ public class CategoryService implements ICategoryService {
                         cacheManager.invalidate("inventory:product:" + product.getId());
                         cacheManager.invalidate("inventory:quantity:" + product.getId());
                     });
-            
+
             // Delete the product
             productRepository.delete(product);
             cacheManager.invalidate("product:" + product.getId());
         }
-        
+
         // Finally delete the category
         categoryRepository.delete(category);
         cacheManager.invalidate("category:" + id);

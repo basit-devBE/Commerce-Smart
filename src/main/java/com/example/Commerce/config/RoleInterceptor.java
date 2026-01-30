@@ -8,26 +8,27 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+
 @Component
 public class RoleInterceptor implements HandlerInterceptor {
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, Object handler) throws Exception{
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, Object handler) throws Exception {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
-        
-        if(!(handler instanceof HandlerMethod handlerMethod)) return true;
+
+        if (!(handler instanceof HandlerMethod handlerMethod)) return true;
         RequiresRole annotation = handlerMethod.getMethodAnnotation(RequiresRole.class);
 
-        if(annotation == null) return  true;
+        if (annotation == null) return true;
 
         String userRole = (String) request.getAttribute("authenticatedUserRole");
 
-        for(UserRole requiredRole : annotation.value()){
-            if(requiredRole.name().equals(userRole)){
+        for (UserRole requiredRole : annotation.value()) {
+            if (requiredRole.name().equals(userRole)) {
                 return true;
             }
         }
-        throw  new UnauthorizedException("User does not have required role to access this resource");
+        throw new UnauthorizedException("User does not have required role to access this resource");
     }
 }

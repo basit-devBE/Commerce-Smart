@@ -6,10 +6,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Map;
-import java.util.HashMap;
 
 @Aspect
 @Component
@@ -25,18 +25,18 @@ public class PerformanceMonitoringAspect {
         String className = fullSignature.substring(fullSignature.lastIndexOf('.') + 1);
         String methodName = joinPoint.getSignature().getName();
         String fullKey = className + "." + methodName;
-        
+
         long startTime = System.currentTimeMillis();
-        
+
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
-            
+
             dbMetrics.computeIfAbsent(fullKey, k -> new QueryMetrics())
                     .recordExecution(executionTime);
-            
+
             log.info("DB Query: {} took {}ms", fullKey, executionTime);
-            
+
             return result;
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;

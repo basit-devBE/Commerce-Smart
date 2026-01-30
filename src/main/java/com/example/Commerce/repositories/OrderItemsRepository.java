@@ -3,8 +3,10 @@ package com.example.Commerce.repositories;
 import com.example.Commerce.entities.OrderItemsEntity;
 import com.example.Commerce.interfaces.IOrderItemsRepository;
 import org.springframework.stereotype.Repository;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class OrderItemsRepository implements IOrderItemsRepository {

@@ -1,21 +1,21 @@
 package com.example.Commerce.services;
 
-import com.example.Commerce.dtos.*;
-import com.example.Commerce.entities.UserEntity;
-import com.example.Commerce.entities.OrderEntity;
-import com.example.Commerce.mappers.UserMapper;
-import com.example.Commerce.interfaces.IUserRepository;
-import com.example.Commerce.interfaces.IUserService;
-import com.example.Commerce.interfaces.IOrderRepository;
-import com.example.Commerce.interfaces.IOrderItemsRepository;
 import com.example.Commerce.cache.CacheManager;
+import com.example.Commerce.dtos.*;
+import com.example.Commerce.entities.OrderEntity;
+import com.example.Commerce.entities.UserEntity;
 import com.example.Commerce.errorhandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorhandlers.ResourceNotFoundException;
+import com.example.Commerce.interfaces.IOrderItemsRepository;
+import com.example.Commerce.interfaces.IOrderRepository;
+import com.example.Commerce.interfaces.IUserRepository;
+import com.example.Commerce.interfaces.IUserService;
+import com.example.Commerce.mappers.UserMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,14 +39,14 @@ public class UserService implements IUserService {
         this.orderItemsRepository = orderItemsRepository;
     }
 
-    public LoginResponseDTO addUser(UserRegistrationDTO userDTO){
+    public LoginResponseDTO addUser(UserRegistrationDTO userDTO) {
 
         Optional<UserEntity> existingUser = userRepository.findByEmail(userDTO.getEmail());
-        if(existingUser.isPresent()){
+        if (existingUser.isPresent()) {
             throw new ResourceAlreadyExists("Email already exists: " + userDTO.getEmail());
         } else {
             UserEntity userEntity = userMapper.toEntity(userDTO);
-            
+
             String hashedPassword = BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt());
             userEntity.setPassword(hashedPassword);
 
@@ -59,12 +59,12 @@ public class UserService implements IUserService {
         }
     }
 
-    public LoginResponseDTO loginUser(LoginDTO loginDTO){
+    public LoginResponseDTO loginUser(LoginDTO loginDTO) {
         log.info("Attempting login for email: {}", loginDTO.getEmail());
         Optional<UserEntity> userOpt = userRepository.findByEmail(loginDTO.getEmail());
-        if(userOpt.isPresent()){
+        if (userOpt.isPresent()) {
             UserEntity userEntity = userOpt.get();
-            if(BCrypt.checkpw(loginDTO.getPassword(), userEntity.getPassword())){
+            if (BCrypt.checkpw(loginDTO.getPassword(), userEntity.getPassword())) {
                 String randomString = UUID.randomUUID().toString().replace("-", "");
                 String token = randomString + "-" + userEntity.getId();
                 LoginResponseDTO responseDTO = userMapper.toResponseDTO(userEntity);
@@ -79,64 +79,65 @@ public class UserService implements IUserService {
     }
 
 
-    public UserSummaryDTO findUserById(Long id){
+    public UserSummaryDTO findUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         UserSummaryDTO summary = userMapper.toSummaryDTO(user);
         summary.setName(user.getFirstName() + " " + user.getLastName());
         return summary;
     }
-    public UserSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
+
+    public UserSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        
+
         // Handle name splitting if name is provided
         if (userDTO.getName() != null && !userDTO.getName().trim().isEmpty()) {
             String[] nameParts = userDTO.getName().trim().split("\\s+", 2);
             userDTO.setFirstName(nameParts[0]);
             userDTO.setLastName(nameParts.length > 1 ? nameParts[1] : "");
         }
-        
+
         String oldEmail = userEntity.getEmail();
         userMapper.updateEntity(userDTO, userEntity);
         UserEntity updatedUser = userRepository.save(userEntity);
-        
+
         cacheManager.invalidate("user:" + id);
         cacheManager.invalidate("user:email:" + oldEmail);
         if (userDTO.getEmail() != null && !oldEmail.equals(userDTO.getEmail())) {
             cacheManager.invalidate("user:email:" + userDTO.getEmail());
         }
-        
+
         UserSummaryDTO summary = userMapper.toSummaryDTO(updatedUser);
         summary.setName(updatedUser.getFirstName() + " " + updatedUser.getLastName());
         return summary;
     }
 
-    public Page<UserSummaryDTO> getAllUsers(Pageable pageable){
-        return userRepository.findAll(pageable).map(user -> 
-            cacheManager.get("user:" + user.getId(), () -> {
-                UserSummaryDTO summary = userMapper.toSummaryDTO(user);
-                summary.setName(user.getFirstName() + " " + user.getLastName());
-                return summary;
-            })
+    public Page<UserSummaryDTO> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(user ->
+                cacheManager.get("user:" + user.getId(), () -> {
+                    UserSummaryDTO summary = userMapper.toSummaryDTO(user);
+                    summary.setName(user.getFirstName() + " " + user.getLastName());
+                    return summary;
+                })
         );
     }
 
-    public void deleteUser(Long id){
+    public void deleteUser(Long id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         String email = userEntity.getEmail();
-        
+
         // Get all orders for this user
         List<OrderEntity> orders = orderRepository.findByUserId(id);
-        
+
         // Delete order items and orders
         for (OrderEntity order : orders) {
             orderItemsRepository.deleteAll(orderItemsRepository.findByOrderId(order.getId()));
             orderRepository.delete(order);
             cacheManager.invalidate("order:" + order.getId());
         }
-        
+
         // Delete the user
         userRepository.delete(userEntity);
         cacheManager.invalidate("user:" + id);

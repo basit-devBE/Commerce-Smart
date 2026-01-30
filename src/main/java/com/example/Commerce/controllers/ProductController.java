@@ -2,11 +2,7 @@ package com.example.Commerce.controllers;
 
 
 import com.example.Commerce.config.RequiresRole;
-import com.example.Commerce.dtos.AddProductDTO;
-import com.example.Commerce.dtos.ApiResponse;
-import com.example.Commerce.dtos.PagedResponse;
-import com.example.Commerce.dtos.ProductResponseDTO;
-import com.example.Commerce.dtos.UpdateProductDTO;
+import com.example.Commerce.dtos.*;
 import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IProductService;
 import com.example.Commerce.utils.sorting.SortingService;
@@ -36,7 +32,7 @@ public class ProductController {
     @Operation(summary = "Add a new product")
     @RequiresRole(UserRole.ADMIN)
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse<ProductResponseDTO>> addProduct(@Valid @RequestBody AddProductDTO request){
+    public ResponseEntity<ApiResponse<ProductResponseDTO>> addProduct(@Valid @RequestBody AddProductDTO request) {
         ProductResponseDTO product = productService.addProduct(request);
         ApiResponse<ProductResponseDTO> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), "Product added successfully", product);
         return ResponseEntity.ok(apiResponse);
@@ -45,12 +41,12 @@ public class ProductController {
     @Operation(summary = "Add multiple products")
     @RequiresRole(UserRole.ADMIN)
     @PostMapping("/add/bulk")
-    public ResponseEntity<ApiResponse<List<ProductResponseDTO>>> addProducts(@Valid @RequestBody List<AddProductDTO> requests){
+    public ResponseEntity<ApiResponse<List<ProductResponseDTO>>> addProducts(@Valid @RequestBody List<AddProductDTO> requests) {
         List<ProductResponseDTO> products = requests.stream()
-            .map(productService::addProduct)
-            .toList();
-        ApiResponse<List<ProductResponseDTO>> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), 
-            products.size() + " products added successfully", products);
+                .map(productService::addProduct)
+                .toList();
+        ApiResponse<List<ProductResponseDTO>> apiResponse = new ApiResponse<>(HttpStatus.OK.value(),
+                products.size() + " products added successfully", products);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -64,20 +60,20 @@ public class ProductController {
             @RequestParam(value = "sortBy", required = false) String sortBy,
             @RequestParam(value = "ascending", defaultValue = "true") boolean ascending,
             @RequestParam(value = "algorithm", defaultValue = "QUICKSORT") String algorithm
-    ){
+    ) {
         Pageable pageable = Pageable.ofSize(size).withPage(page);
         Page<ProductResponseDTO> products;
-        
+
         boolean isAdmin = "ADMIN".equals(userRole);
-        
+
         if (categoryId != null) {
             products = productService.getProductsByCategory(categoryId, pageable, isAdmin);
         } else {
             products = productService.getAllProducts(pageable, isAdmin);
         }
-        
+
         List<ProductResponseDTO> productList = products.getContent();
-        
+
         // Apply custom sorting if sortBy is specified
         if (sortBy != null) {
             try {
@@ -88,7 +84,7 @@ public class ProductController {
                 // Invalid sortBy or algorithm, ignore and return unsorted
             }
         }
-        
+
         PagedResponse<ProductResponseDTO> pagedResponse = new PagedResponse<>(
                 productList,
                 products.getNumber(),
@@ -102,7 +98,7 @@ public class ProductController {
 
     @Operation(summary = "Get product by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponseDTO>> getProductById(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<ProductResponseDTO>> getProductById(@PathVariable Long id) {
         ProductResponseDTO product = productService.getProductById(id);
         ApiResponse<ProductResponseDTO> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), "Product fetched successfully", product);
         return ResponseEntity.ok(apiResponse);
@@ -112,8 +108,8 @@ public class ProductController {
     @RequiresRole(UserRole.ADMIN)
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<ProductResponseDTO>> updateProduct(
-            @PathVariable Long id, 
-            @Valid @RequestBody UpdateProductDTO request){
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateProductDTO request) {
         ProductResponseDTO updatedProduct = productService.updateProduct(id, request);
         ApiResponse<ProductResponseDTO> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), "Product updated successfully", updatedProduct);
         return ResponseEntity.ok(apiResponse);
@@ -122,7 +118,7 @@ public class ProductController {
     @Operation(summary = "Delete a product")
     @RequiresRole(UserRole.ADMIN)
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         ApiResponse<Void> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), "Product deleted successfully", null);
         return ResponseEntity.ok(apiResponse);

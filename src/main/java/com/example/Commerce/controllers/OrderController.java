@@ -54,7 +54,7 @@ public class OrderController {
         Pageable pageable = Pageable.ofSize(size).withPage(page);
         Page<OrderResponseDTO> orders = orderService.getAllOrders(pageable);
         List<OrderResponseDTO> orderList = orders.getContent();
-        
+
         // Apply custom sorting if sortBy is specified
         if (sortBy != null) {
             try {
@@ -65,7 +65,7 @@ public class OrderController {
                 // Invalid sortBy or algorithm, ignore and return unsorted
             }
         }
-        
+
         PagedResponse<OrderResponseDTO> pagedResponse = new PagedResponse<>(
                 orderList,
                 orders.getNumber(),

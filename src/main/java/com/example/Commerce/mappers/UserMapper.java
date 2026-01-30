@@ -5,11 +5,7 @@ import com.example.Commerce.dtos.UpdateUserDTO;
 import com.example.Commerce.dtos.UserRegistrationDTO;
 import com.example.Commerce.dtos.UserSummaryDTO;
 import com.example.Commerce.entities.UserEntity;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {

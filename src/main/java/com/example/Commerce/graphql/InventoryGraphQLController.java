@@ -67,6 +67,9 @@ public class InventoryGraphQLController {
         return true;
     }
 
-    public record AddInventoryInput(Long productId, Integer quantity, String location) {}
-    public record UpdateInventoryInput(Integer quantity, String location) {}
+    public record AddInventoryInput(Long productId, Integer quantity, String location) {
+    }
+
+    public record UpdateInventoryInput(Integer quantity, String location) {
+    }
 }

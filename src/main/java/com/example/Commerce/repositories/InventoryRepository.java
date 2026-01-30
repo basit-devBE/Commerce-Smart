@@ -2,12 +2,15 @@ package com.example.Commerce.repositories;
 
 import com.example.Commerce.entities.InventoryEntity;
 import com.example.Commerce.interfaces.IInventoryRepository;
-import org.springframework.stereotype.Repository;
-import java.sql.*;
-import java.util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class InventoryRepository implements IInventoryRepository {
@@ -74,7 +77,7 @@ public class InventoryRepository implements IInventoryRepository {
     public Page<InventoryEntity> findAll(Pageable pageable) {
         List<InventoryEntity> inventories = new ArrayList<>();
         String sql;
-        
+
         if (pageable.isPaged()) {
             sql = "SELECT * FROM inventory LIMIT ? OFFSET ?";
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -98,7 +101,7 @@ public class InventoryRepository implements IInventoryRepository {
                 throw new RuntimeException(e);
             }
         }
-        
+
         // Get total count
         int total = 0;
         String countSql = "SELECT COUNT(*) FROM inventory";

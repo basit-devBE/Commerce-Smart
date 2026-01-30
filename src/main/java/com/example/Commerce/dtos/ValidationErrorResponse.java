@@ -7,17 +7,17 @@ import java.util.Map;
 
 @Schema(description = "Error response for validation failures with field-specific error messages")
 public class ValidationErrorResponse {
-    
+
     @Schema(description = "Timestamp when the validation error occurred", example = "2026-01-19T10:30:00.000+00:00")
     private Date timestamp;
-    
+
     @Schema(description = "HTTP status code", example = "400")
     private Integer status;
-    
-    @Schema(description = "Map of field names to their corresponding error messages", 
+
+    @Schema(description = "Map of field names to their corresponding error messages",
             example = "{\"email\": \"must be a well-formed email address\", \"name\": \"must not be blank\"}")
     private Map<String, String> errors;
-    
+
     @Schema(description = "Request path that caused the error", example = "uri=/api/users/register")
     private String path;
 

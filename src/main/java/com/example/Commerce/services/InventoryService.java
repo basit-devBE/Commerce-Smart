@@ -1,17 +1,17 @@
 package com.example.Commerce.services;
 
+import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.dtos.AddInventoryDTO;
 import com.example.Commerce.dtos.InventoryResponseDTO;
 import com.example.Commerce.dtos.UpdateInventoryDTO;
 import com.example.Commerce.entities.InventoryEntity;
-import com.example.Commerce.mappers.InventoryMapper;
-import com.example.Commerce.interfaces.IInventoryRepository;
-import com.example.Commerce.interfaces.IInventoryService;
-import com.example.Commerce.interfaces.IProductRepository;
-import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorhandlers.ConstraintViolationException;
 import com.example.Commerce.errorhandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorhandlers.ResourceNotFoundException;
+import com.example.Commerce.interfaces.IInventoryRepository;
+import com.example.Commerce.interfaces.IInventoryService;
+import com.example.Commerce.interfaces.IProductRepository;
+import com.example.Commerce.mappers.InventoryMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,10 @@ public class InventoryService implements IInventoryService {
     private final InventoryMapper inventoryMapper;
     private final CacheManager cacheManager;
 
-    public InventoryService(IInventoryRepository inventoryRepository, 
-                           IProductRepository productRepository,
-                           InventoryMapper inventoryMapper,
-                           CacheManager cacheManager) {
+    public InventoryService(IInventoryRepository inventoryRepository,
+                            IProductRepository productRepository,
+                            InventoryMapper inventoryMapper,
+                            CacheManager cacheManager) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.inventoryMapper = inventoryMapper;
@@ -57,12 +57,12 @@ public class InventoryService implements IInventoryService {
 
     public Page<InventoryResponseDTO> getAllInventories(Pageable pageable) {
         return inventoryRepository.findAll(pageable)
-            .map(inventory -> cacheManager.get("inventory:" + inventory.getId(), () -> {
-                InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
-                productRepository.findById(inventory.getProductId())
-                        .ifPresent(product -> response.setProductName(product.getName()));
-                return response;
-            }));
+                .map(inventory -> cacheManager.get("inventory:" + inventory.getId(), () -> {
+                    InventoryResponseDTO response = inventoryMapper.toResponseDTO(inventory);
+                    productRepository.findById(inventory.getProductId())
+                            .ifPresent(product -> response.setProductName(product.getName()));
+                    return response;
+                }));
     }
 
     public InventoryResponseDTO getInventoryById(Long id) {
@@ -93,7 +93,7 @@ public class InventoryService implements IInventoryService {
         if (updateInventoryDTO.getQuantity() != null) {
             existingInventory.setQuantity(updateInventoryDTO.getQuantity());
         }
-        
+
         if (updateInventoryDTO.getLocation() != null) {
             existingInventory.setLocation(updateInventoryDTO.getLocation());
         }
@@ -131,9 +131,9 @@ public class InventoryService implements IInventoryService {
     public void deleteInventory(Long id) {
         InventoryEntity inventory = inventoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found with ID: " + id));
-        
+
         Long productId = inventory.getProductId();
-        
+
         try {
             inventoryRepository.delete(inventory);
             cacheManager.invalidate("inventory:" + id);
@@ -142,8 +142,8 @@ public class InventoryService implements IInventoryService {
             cacheManager.invalidate("product:" + productId);
         } catch (Exception ex) {
             if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
-            throw new ConstraintViolationException(
-                    "Cannot delete inventory. It has related dependencies that must be removed first.");
+                throw new ConstraintViolationException(
+                        "Cannot delete inventory. It has related dependencies that must be removed first.");
             }
             throw ex;
         }

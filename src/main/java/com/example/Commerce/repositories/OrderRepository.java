@@ -3,15 +3,15 @@ package com.example.Commerce.repositories;
 import com.example.Commerce.entities.OrderEntity;
 import com.example.Commerce.enums.OrderStatus;
 import com.example.Commerce.interfaces.IOrderRepository;
-import java.util.Optional;
-import org.springframework.stereotype.Repository;
-import java.sql.*;
-import java.util.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class OrderRepository implements IOrderRepository {

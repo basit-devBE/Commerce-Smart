@@ -7,6 +7,6 @@ import lombok.Data;
 public class UpdateInventoryDTO {
     @PositiveOrZero(message = "Quantity must be zero or positive")
     private Integer quantity;
-    
+
     private String location;
 }

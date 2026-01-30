@@ -75,7 +75,12 @@ public class OrderGraphQLController {
         return true;
     }
 
-    public record AddOrderInput(Long userId, List<OrderItemInput> items) {}
-    public record OrderItemInput(Long productId, Integer quantity) {}
-    public record UpdateOrderInput(OrderStatus status) {}
+    public record AddOrderInput(Long userId, List<OrderItemInput> items) {
+    }
+
+    public record OrderItemInput(Long productId, Integer quantity) {
+    }
+
+    public record UpdateOrderInput(OrderStatus status) {
+    }
 }

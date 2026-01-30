@@ -1,4 +1,5 @@
 package com.example.Commerce.errorhandlers;
+
 import io.swagger.v3.oas.annotations.Hidden;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,12 @@ import java.util.stream.Collectors;
 public class CustomExceptionHandler {
 
     @ExceptionHandler(value = ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request){
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         HashMap<String, Object> error = new HashMap<>();
         error.put("timestamp", new Date());
         error.put("message", ex.getMessage());
         error.put(("path"), request.getDescription(false));
-        return new ResponseEntity<>(error,HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = ResourceAlreadyExists.class)
@@ -38,12 +39,12 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request){
+    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
         HashMap<String, Object> error = new HashMap<>();
         error.put("timestamp", new Date());
         error.put("message", ex.getMessage());
         error.put(("path"), request.getDescription(false));
-        return new ResponseEntity<>(error,HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -55,7 +56,7 @@ public class CustomExceptionHandler {
                 .collect(Collectors.toMap(
                         FieldError::getField,
                         fieldError -> fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "Invalid value",
-                            (existing, replacement) -> existing
+                        (existing, replacement) -> existing
                 ));
 
         HashMap<String, Object> body = new HashMap<>();
@@ -75,6 +76,7 @@ public class CustomExceptionHandler {
         error.put("path", request.getDescription(false));
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, WebRequest request) {
         HashMap<String, Object> error = new HashMap<>();

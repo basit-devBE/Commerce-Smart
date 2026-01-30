@@ -16,6 +16,7 @@ public class JdbcConnectionConfig {
     private String username;
     @Value("${spring.datasource.password}")
     private String password;
+
     @Bean
     public Connection jdbcConnection() throws SQLException {
         return DriverManager.getConnection(url, username, password);

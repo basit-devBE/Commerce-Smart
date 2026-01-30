@@ -1,7 +1,10 @@
 package com.example.Commerce.graphql;
 
 import com.example.Commerce.config.GraphQLRequiresRole;
-import com.example.Commerce.dtos.*;
+import com.example.Commerce.dtos.LoginDTO;
+import com.example.Commerce.dtos.LoginResponseDTO;
+import com.example.Commerce.dtos.UserRegistrationDTO;
+import com.example.Commerce.dtos.UserSummaryDTO;
 import com.example.Commerce.enums.UserRole;
 import com.example.Commerce.interfaces.IUserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -33,7 +36,7 @@ public class UserResolver {
         dto.setEmail(input.email());
         dto.setPassword(input.password());
         LoginResponseDTO response = userService.loginUser(dto);
-        return new AuthResponse(response.getToken(), response.getId(), response.getEmail(), 
+        return new AuthResponse(response.getToken(), response.getId(), response.getEmail(),
                 response.getFirstName(), response.getLastName(), response.getRole());
     }
 
@@ -46,11 +49,16 @@ public class UserResolver {
         dto.setPassword(input.password());
         dto.setRole(input.role());
         LoginResponseDTO response = userService.addUser(dto);
-        return new AuthResponse(response.getToken(), response.getId(), response.getEmail(), 
+        return new AuthResponse(response.getToken(), response.getId(), response.getEmail(),
                 response.getFirstName(), response.getLastName(), response.getRole());
     }
 
-    public record LoginInput(String email, String password) {}
-    public record RegisterInput(String firstName, String lastName, String email, String password, UserRole role) {}
-    public record AuthResponse(String token, Long id, String email, String firstName, String lastName, String role) {}
+    public record LoginInput(String email, String password) {
+    }
+
+    public record RegisterInput(String firstName, String lastName, String email, String password, UserRole role) {
+    }
+
+    public record AuthResponse(String token, Long id, String email, String firstName, String lastName, String role) {
+    }
 }

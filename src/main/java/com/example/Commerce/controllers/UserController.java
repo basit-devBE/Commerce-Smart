@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -28,6 +27,7 @@ public class UserController {
     public UserController(IUserService userService) {
         this.userService = userService;
     }
+
     @Operation(summary = "Register a new user")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<LoginResponseDTO>> registerUser(@Valid @RequestBody UserRegistrationDTO request) {
@@ -38,7 +38,7 @@ public class UserController {
 
     @Operation(summary = "User login")
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDTO>> loginUser(@Valid @RequestBody LoginDTO request){
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> loginUser(@Valid @RequestBody LoginDTO request) {
         LoginResponseDTO user = userService.loginUser(request);
         ApiResponse<LoginResponseDTO> apiResponse = new ApiResponse<>(HttpStatus.OK.value(), "User logged in successfully", user);
         return ResponseEntity.ok(apiResponse);
@@ -65,7 +65,7 @@ public class UserController {
     @Operation(summary = "Get all users")
     @RequiresRole(UserRole.ADMIN)
     @GetMapping("/all")
-   public ResponseEntity<ApiResponse<PagedResponse<UserSummaryDTO>>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<ApiResponse<PagedResponse<UserSummaryDTO>>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = Pageable.ofSize(size).withPage(page);
         Page<UserSummaryDTO> usersPage = userService.getAllUsers(pageable);
         PagedResponse<UserSummaryDTO> pagedResponse = new PagedResponse<>(
@@ -75,7 +75,7 @@ public class UserController {
                 usersPage.getTotalPages(),
                 usersPage.isLast()
         );
-        ApiResponse<PagedResponse<UserSummaryDTO>> apiResponse = 
+        ApiResponse<PagedResponse<UserSummaryDTO>> apiResponse =
                 new ApiResponse<>(HttpStatus.OK.value(), "Users fetched successfully", pagedResponse);
         return ResponseEntity.ok(apiResponse);
     }

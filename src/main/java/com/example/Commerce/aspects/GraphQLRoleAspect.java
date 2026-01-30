@@ -18,7 +18,7 @@ public class GraphQLRoleAspect {
     public Object checkRole(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         GraphQLRequiresRole annotation = signature.getMethod().getAnnotation(GraphQLRequiresRole.class);
-        
+
         DataFetchingEnvironment env = null;
         for (Object arg : joinPoint.getArgs()) {
             if (arg instanceof DataFetchingEnvironment) {
@@ -26,22 +26,22 @@ public class GraphQLRoleAspect {
                 break;
             }
         }
-        
+
         if (env == null) {
             throw new UnauthorizedException("Authentication required");
         }
-        
+
         String userRole = env.getGraphQlContext().get("userRole");
         if (userRole == null) {
             throw new UnauthorizedException("Authentication required");
         }
-        
+
         for (UserRole requiredRole : annotation.value()) {
             if (requiredRole.name().equals(userRole)) {
                 return joinPoint.proceed();
             }
         }
-        
+
         throw new UnauthorizedException("User does not have required role");
     }
 }

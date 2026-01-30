@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class AddOrderDTO {
     private Long userId;
-    
+
     @NotEmpty(message = "Order items cannot be empty")
     @Valid
     private List<OrderItemDTO> items;
