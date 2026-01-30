@@ -3,7 +3,7 @@ package com.example.Commerce.mappers;
 import com.example.Commerce.dtos.LoginResponseDTO;
 import com.example.Commerce.dtos.UpdateUserDTO;
 import com.example.Commerce.dtos.UserRegistrationDTO;
-import com.example.Commerce.dtos.userSummaryDTO;
+import com.example.Commerce.dtos.UserSummaryDTO;
 import com.example.Commerce.entities.UserEntity;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -22,7 +22,7 @@ public interface UserMapper {
     UserEntity toEntity(UserRegistrationDTO UserRegistrationDTO);
 
     @Mapping(target = "name", ignore = true)
-    userSummaryDTO toSummaryDTO(UserEntity userEntity);
+    UserSummaryDTO toSummaryDTO(UserEntity userEntity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)

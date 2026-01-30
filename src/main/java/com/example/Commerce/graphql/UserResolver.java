@@ -23,7 +23,7 @@ public class UserResolver {
 
     @QueryMapping
     @GraphQLRequiresRole(UserRole.ADMIN)
-    public List<userSummaryDTO> getAllUsers(DataFetchingEnvironment env) {
+    public List<UserSummaryDTO> getAllUsers(DataFetchingEnvironment env) {
         return userService.getAllUsers(Pageable.unpaged()).getContent();
     }
 

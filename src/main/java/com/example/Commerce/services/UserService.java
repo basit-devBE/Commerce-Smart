@@ -9,8 +9,8 @@ import com.example.Commerce.interfaces.IUserService;
 import com.example.Commerce.interfaces.IOrderRepository;
 import com.example.Commerce.interfaces.IOrderItemsRepository;
 import com.example.Commerce.cache.CacheManager;
-import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
-import com.example.Commerce.errorHandlers.ResourceNotFoundException;
+import com.example.Commerce.errorhandlers.ResourceAlreadyExists;
+import com.example.Commerce.errorhandlers.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -79,14 +79,14 @@ public class UserService implements IUserService {
     }
 
 
-    public userSummaryDTO findUserById(Long id){
+    public UserSummaryDTO findUserById(Long id){
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-        userSummaryDTO summary = userMapper.toSummaryDTO(user);
+        UserSummaryDTO summary = userMapper.toSummaryDTO(user);
         summary.setName(user.getFirstName() + " " + user.getLastName());
         return summary;
     }
-    public userSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
+    public UserSummaryDTO updateUser(Long id, @Valid UpdateUserDTO userDTO){
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
@@ -107,15 +107,15 @@ public class UserService implements IUserService {
             cacheManager.invalidate("user:email:" + userDTO.getEmail());
         }
         
-        userSummaryDTO summary = userMapper.toSummaryDTO(updatedUser);
+        UserSummaryDTO summary = userMapper.toSummaryDTO(updatedUser);
         summary.setName(updatedUser.getFirstName() + " " + updatedUser.getLastName());
         return summary;
     }
 
-    public Page<userSummaryDTO> getAllUsers(Pageable pageable){
+    public Page<UserSummaryDTO> getAllUsers(Pageable pageable){
         return userRepository.findAll(pageable).map(user -> 
             cacheManager.get("user:" + user.getId(), () -> {
-                userSummaryDTO summary = userMapper.toSummaryDTO(user);
+                UserSummaryDTO summary = userMapper.toSummaryDTO(user);
                 summary.setName(user.getFirstName() + " " + user.getLastName());
                 return summary;
             })

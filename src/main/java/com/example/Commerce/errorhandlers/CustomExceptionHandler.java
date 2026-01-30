@@ -1,4 +1,4 @@
-package com.example.Commerce.errorHandlers;
+package com.example.Commerce.errorhandlers;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.hibernate.JDBCException;
 import org.springframework.http.HttpStatus;

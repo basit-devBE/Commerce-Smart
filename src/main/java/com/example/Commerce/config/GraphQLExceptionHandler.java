@@ -1,7 +1,7 @@
 package com.example.Commerce.config;
 
-import com.example.Commerce.errorHandlers.ResourceNotFoundException;
-import com.example.Commerce.errorHandlers.UnauthorizedException;
+import com.example.Commerce.errorhandlers.ResourceNotFoundException;
+import com.example.Commerce.errorhandlers.UnauthorizedException;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;

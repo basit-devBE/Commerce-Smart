@@ -2,7 +2,7 @@ package com.example.Commerce.aspects;
 
 import com.example.Commerce.config.GraphQLRequiresRole;
 import com.example.Commerce.enums.UserRole;
-import com.example.Commerce.errorHandlers.UnauthorizedException;
+import com.example.Commerce.errorhandlers.UnauthorizedException;
 import graphql.schema.DataFetchingEnvironment;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

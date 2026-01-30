@@ -1,4 +1,4 @@
-package com.example.Commerce.errorHandlers;
+package com.example.Commerce.errorhandlers;
 
 public class ConstraintViolationException extends RuntimeException {
     public ConstraintViolationException(String message) {

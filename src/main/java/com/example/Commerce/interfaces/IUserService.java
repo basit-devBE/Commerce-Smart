@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 public interface IUserService {
     LoginResponseDTO addUser(UserRegistrationDTO userDTO);
     LoginResponseDTO loginUser(LoginDTO loginDTO);
-    userSummaryDTO findUserById(Long id);
-    userSummaryDTO updateUser(Long id, UpdateUserDTO userDTO);
-    Page<userSummaryDTO> getAllUsers(Pageable pageable);
+    UserSummaryDTO findUserById(Long id);
+    UserSummaryDTO updateUser(Long id, UpdateUserDTO userDTO);
+    Page<UserSummaryDTO> getAllUsers(Pageable pageable);
     void deleteUser(Long id);
 }
