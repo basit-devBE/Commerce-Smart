@@ -15,9 +15,12 @@ import com.example.Commerce.cache.CacheManager;
 import com.example.Commerce.errorHandlers.ConstraintViolationException;
 import com.example.Commerce.errorHandlers.ResourceAlreadyExists;
 import com.example.Commerce.errorHandlers.ResourceNotFoundException;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -59,10 +62,15 @@ public class ProductService implements IProductService {
         Page<ProductEntity> productPage = isAdmin ? 
             productRepository.findAll(pageable) : 
             productRepository.findAllWithInventory(pageable);
-            
+
+        return getProductResponseDTOS(productPage);
+    }
+
+    @NonNull
+    private Page<ProductResponseDTO> getProductResponseDTOS(Page<ProductEntity> productPage) {
         return productPage.map(product -> {
             ProductResponseDTO response = productMapper.toResponseDTO(product);
-            
+
             CategoryEntity category = cacheManager.get("category:" + product.getCategoryId(), () ->
                 categoryRepository.findById(product.getCategoryId())
                     .orElse(null)
@@ -70,8 +78,8 @@ public class ProductService implements IProductService {
             if (category != null) {
                 response.setCategoryName(category.getName());
             }
-            
-            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
+
+            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () ->
                 inventoryRepository.findByProductId(product.getId())
                     .map(InventoryEntity::getQuantity)
                     .orElse(0)
@@ -88,26 +96,8 @@ public class ProductService implements IProductService {
         Page<ProductEntity> productPage = isAdmin ? 
             productRepository.findByCategoryId(categoryId, pageable) : 
             productRepository.findByCategoryIdWithInventory(categoryId, pageable);
-            
-        return productPage.map(product -> {
-            ProductResponseDTO response = productMapper.toResponseDTO(product);
-            
-            CategoryEntity category = cacheManager.get("category:" + product.getCategoryId(), () ->
-                categoryRepository.findById(product.getCategoryId())
-                    .orElse(null)
-            );
-            if (category != null) {
-                response.setCategoryName(category.getName());
-            }
-            
-            Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
-                inventoryRepository.findByProductId(product.getId())
-                    .map(InventoryEntity::getQuantity)
-                    .orElse(0)
-            );
-            response.setQuantity(quantity);
-            return response;
-        });
+
+        return getProductResponseDTOS(productPage);
     }
 
     public ProductResponseDTO getProductById(Long id){
@@ -157,7 +147,7 @@ public class ProductService implements IProductService {
         return response;
     }
 
-    public java.util.List<ProductResponseDTO> getAllProductsList() {
+    public List<ProductResponseDTO> getAllProductsList() {
         return productRepository.findAllWithInventory().stream().map(product -> {
             ProductResponseDTO response = productMapper.toResponseDTO(product);
             Integer quantity = cacheManager.get("inventory:quantity:" + product.getId(), () -> 
