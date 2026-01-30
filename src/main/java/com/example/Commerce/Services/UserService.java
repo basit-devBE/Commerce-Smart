@@ -51,7 +51,11 @@ public class UserService implements IUserService {
             userEntity.setPassword(hashedPassword);
 
             UserEntity savedUser = userRepository.save(userEntity);
-            return userMapper.toResponseDTO(savedUser);
+            LoginResponseDTO responseDTO = userMapper.toResponseDTO(savedUser);
+            String randomString = UUID.randomUUID().toString().replace("-", "");
+            String token = randomString + "-" + savedUser.getId();
+            responseDTO.setToken(token);
+            return responseDTO;
         }
     }
 
