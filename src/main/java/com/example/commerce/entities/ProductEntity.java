@@ -1,0 +1,23 @@
+package com.example.commerce.entities;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class ProductEntity {
+    private Long id;
+    private String name;
+    private Long categoryId;
+    private String sku;
+    private Double price;
+    private boolean isAvailable = true;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
