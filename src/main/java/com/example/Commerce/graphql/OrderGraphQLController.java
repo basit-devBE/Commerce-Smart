@@ -1,11 +1,14 @@
 package com.example.Commerce.graphql;
 
+import com.example.Commerce.Config.GraphQLRequiresRole;
 import com.example.Commerce.DTOs.AddOrderDTO;
 import com.example.Commerce.DTOs.OrderItemDTO;
 import com.example.Commerce.DTOs.OrderResponseDTO;
 import com.example.Commerce.DTOs.UpdateOrderDTO;
 import com.example.Commerce.Enums.OrderStatus;
+import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.interfaces.IOrderService;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -24,22 +27,26 @@ public class OrderGraphQLController {
     }
 
     @QueryMapping
-    public List<OrderResponseDTO> allOrders() {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public List<OrderResponseDTO> allOrders(DataFetchingEnvironment env) {
         return orderService.getAllOrders(Pageable.unpaged()).getContent();
     }
 
     @QueryMapping
-    public OrderResponseDTO orderById(@Argument Long id) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.CUSTOMER})
+    public OrderResponseDTO orderById(@Argument Long id, DataFetchingEnvironment env) {
         return orderService.getOrderById(id);
     }
 
     @QueryMapping
-    public List<OrderResponseDTO> ordersByUserId(@Argument Long userId) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.CUSTOMER})
+    public List<OrderResponseDTO> ordersByUserId(@Argument Long userId, DataFetchingEnvironment env) {
         return orderService.getOrdersByUserId(userId, Pageable.unpaged()).getContent();
     }
 
     @MutationMapping
-    public OrderResponseDTO createOrder(@Argument AddOrderInput input) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.CUSTOMER})
+    public OrderResponseDTO createOrder(@Argument AddOrderInput input, DataFetchingEnvironment env) {
         AddOrderDTO dto = new AddOrderDTO();
         dto.setUserId(input.userId());
         dto.setItems(input.items().stream()
@@ -54,14 +61,16 @@ public class OrderGraphQLController {
     }
 
     @MutationMapping
-    public OrderResponseDTO updateOrderStatus(@Argument Long id, @Argument UpdateOrderInput input) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public OrderResponseDTO updateOrderStatus(@Argument Long id, @Argument UpdateOrderInput input, DataFetchingEnvironment env) {
         UpdateOrderDTO dto = new UpdateOrderDTO();
         dto.setStatus(input.status());
         return orderService.updateOrderStatus(id, dto);
     }
 
     @MutationMapping
-    public boolean deleteOrder(@Argument Long id) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public boolean deleteOrder(@Argument Long id, DataFetchingEnvironment env) {
         orderService.deleteOrder(id);
         return true;
     }

@@ -100,6 +100,28 @@ input UpdateOrderInput {
     status: OrderStatus!
 }
 
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input RegisterInput {
+    firstName: String!
+    lastName: String!
+    email: String!
+    password: String!
+    role: UserRole!
+}
+
+type AuthResponse {
+    token: String!
+    id: ID!
+    email: String!
+    firstName: String!
+    lastName: String!
+    role: String!
+}
+
 type Query {
     getUserById(id: ID!): User
     getAllUsers: [User!]!
@@ -116,6 +138,8 @@ type Query {
 }
 
 type Mutation {
+    login(input: LoginInput!): AuthResponse!
+    register(input: RegisterInput!): AuthResponse!
     addProduct(input: AddProductInput!): Product!
     deleteProduct(id: ID!): Boolean!
     addInventory(input: AddInventoryInput!): Inventory!

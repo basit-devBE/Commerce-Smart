@@ -1,9 +1,12 @@
 package com.example.Commerce.graphql;
 
+import com.example.Commerce.Config.GraphQLRequiresRole;
 import com.example.Commerce.DTOs.AddCategoryDTO;
 import com.example.Commerce.DTOs.CategoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateCategoryDTO;
+import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.interfaces.ICategoryService;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -31,7 +34,8 @@ public class CategoryGraphQLController {
     }
  
     @MutationMapping
-    public CategoryResponseDTO addCategory(@Argument AddCategoryInput input) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public CategoryResponseDTO addCategory(@Argument AddCategoryInput input, DataFetchingEnvironment env) {
         AddCategoryDTO dto = new AddCategoryDTO();
         dto.setName(input.name());
         dto.setDescription(input.description());
@@ -39,7 +43,8 @@ public class CategoryGraphQLController {
     }
 
     @MutationMapping
-    public CategoryResponseDTO updateCategory(@Argument Long id, @Argument UpdateCategoryInput input) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public CategoryResponseDTO updateCategory(@Argument Long id, @Argument UpdateCategoryInput input, DataFetchingEnvironment env) {
         UpdateCategoryDTO dto = new UpdateCategoryDTO();
         dto.setName(input.name());
         dto.setDescription(input.description());
@@ -47,7 +52,8 @@ public class CategoryGraphQLController {
     }
 
     @MutationMapping
-    public boolean deleteCategory(@Argument Long id) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public boolean deleteCategory(@Argument Long id, DataFetchingEnvironment env) {
         categoryService.deleteCategory(id);
         return true;
     }

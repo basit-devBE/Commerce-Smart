@@ -1,8 +1,11 @@
 package com.example.Commerce.graphql;
 
+import com.example.Commerce.Config.GraphQLRequiresRole;
 import com.example.Commerce.DTOs.AddProductDTO;
 import com.example.Commerce.DTOs.ProductResponseDTO;
+import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.interfaces.IProductService;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -29,7 +32,8 @@ public class ProductGraphQLController {
     }
 
     @MutationMapping
-    public ProductResponseDTO addProduct(@Argument AddProductInput input) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public ProductResponseDTO addProduct(@Argument AddProductInput input, DataFetchingEnvironment env) {
         AddProductDTO dto = new AddProductDTO();
         dto.setName(input.name());
         dto.setCategoryId(input.categoryId());
@@ -39,7 +43,8 @@ public class ProductGraphQLController {
     }
 
     @MutationMapping
-    public boolean deleteProduct(@Argument Long id) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public boolean deleteProduct(@Argument Long id, DataFetchingEnvironment env) {
         productService.deleteProduct(id);
         return true;
     }

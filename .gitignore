@@ -35,3 +35,4 @@ build/
 .idea/
 Smart E commerce
 .env
+GRAPHQL_AUTH.md

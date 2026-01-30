@@ -1,9 +1,12 @@
 package com.example.Commerce.graphql;
 
+import com.example.Commerce.Config.GraphQLRequiresRole;
 import com.example.Commerce.DTOs.AddInventoryDTO;
 import com.example.Commerce.DTOs.InventoryResponseDTO;
 import com.example.Commerce.DTOs.UpdateInventoryDTO;
+import com.example.Commerce.Enums.UserRole;
 import com.example.Commerce.interfaces.IInventoryService;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -21,22 +24,26 @@ public class InventoryGraphQLController {
     }
 
     @QueryMapping
-    public List<InventoryResponseDTO> allInventories() {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public List<InventoryResponseDTO> allInventories(DataFetchingEnvironment env) {
         return inventoryService.getAllInventories(Pageable.unpaged()).getContent();
     }
 
     @QueryMapping
-    public InventoryResponseDTO inventoryById(@Argument Long id) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public InventoryResponseDTO inventoryById(@Argument Long id, DataFetchingEnvironment env) {
         return inventoryService.getInventoryById(id);
     }
 
     @QueryMapping
-    public InventoryResponseDTO inventoryByProductId(@Argument Long productId) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public InventoryResponseDTO inventoryByProductId(@Argument Long productId, DataFetchingEnvironment env) {
         return inventoryService.getInventoryByProductId(productId);
     }
 
     @MutationMapping
-    public InventoryResponseDTO addInventory(@Argument AddInventoryInput input) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public InventoryResponseDTO addInventory(@Argument AddInventoryInput input, DataFetchingEnvironment env) {
         AddInventoryDTO dto = new AddInventoryDTO();
         dto.setProductId(input.productId());
         dto.setQuantity(input.quantity());
@@ -45,7 +52,8 @@ public class InventoryGraphQLController {
     }
 
     @MutationMapping
-    public InventoryResponseDTO updateInventory(@Argument Long id, @Argument UpdateInventoryInput input) {
+    @GraphQLRequiresRole({UserRole.ADMIN, UserRole.SELLER})
+    public InventoryResponseDTO updateInventory(@Argument Long id, @Argument UpdateInventoryInput input, DataFetchingEnvironment env) {
         UpdateInventoryDTO dto = new UpdateInventoryDTO();
         dto.setQuantity(input.quantity());
         dto.setLocation(input.location());
@@ -53,7 +61,8 @@ public class InventoryGraphQLController {
     }
 
     @MutationMapping
-    public boolean deleteInventory(@Argument Long id) {
+    @GraphQLRequiresRole(UserRole.ADMIN)
+    public boolean deleteInventory(@Argument Long id, DataFetchingEnvironment env) {
         inventoryService.deleteInventory(id);
         return true;
     }
