@@ -1,7 +1,11 @@
 package com.example.commerce.controllers;
 
 import com.example.commerce.config.RequiresRole;
-import com.example.commerce.dtos.*;
+import com.example.commerce.dtos.requests.AddCategoryDTO;
+import com.example.commerce.dtos.requests.UpdateCategoryDTO;
+import com.example.commerce.dtos.responses.ApiResponse;
+import com.example.commerce.dtos.responses.CategoryResponseDTO;
+import com.example.commerce.dtos.responses.PagedResponse;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.ICategoryService;
 import io.swagger.v3.oas.annotations.Operation;

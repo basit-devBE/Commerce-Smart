@@ -1,9 +1,9 @@
 package com.example.commerce.services;
 
 import com.example.commerce.cache.CacheManager;
-import com.example.commerce.dtos.AddInventoryDTO;
-import com.example.commerce.dtos.InventoryResponseDTO;
-import com.example.commerce.dtos.UpdateInventoryDTO;
+import com.example.commerce.dtos.requests.AddInventoryDTO;
+import com.example.commerce.dtos.responses.InventoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateInventoryDTO;
 import com.example.commerce.entities.InventoryEntity;
 import com.example.commerce.errorhandlers.ConstraintViolationException;
 import com.example.commerce.errorhandlers.ResourceAlreadyExists;

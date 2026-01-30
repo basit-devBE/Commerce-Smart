@@ -1,9 +1,9 @@
 package com.example.commerce.graphql;
 
 import com.example.commerce.config.GraphQLRequiresRole;
-import com.example.commerce.dtos.AddCategoryDTO;
-import com.example.commerce.dtos.CategoryResponseDTO;
-import com.example.commerce.dtos.UpdateCategoryDTO;
+import com.example.commerce.dtos.requests.AddCategoryDTO;
+import com.example.commerce.dtos.responses.CategoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateCategoryDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.ICategoryService;
 import graphql.schema.DataFetchingEnvironment;

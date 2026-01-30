@@ -2,7 +2,7 @@ package com.example.commerce.controllers;
 
 import com.example.commerce.aspects.PerformanceMonitoringAspect;
 import com.example.commerce.config.RequiresRole;
-import com.example.commerce.dtos.ApiResponse;
+import com.example.commerce.dtos.responses.ApiResponse;
 import com.example.commerce.enums.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

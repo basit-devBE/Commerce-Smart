@@ -2,7 +2,13 @@ package com.example.commerce.controllers;
 
 
 import com.example.commerce.config.RequiresRole;
-import com.example.commerce.dtos.*;
+import com.example.commerce.dtos.requests.LoginDTO;
+import com.example.commerce.dtos.requests.UpdateUserDTO;
+import com.example.commerce.dtos.requests.UserRegistrationDTO;
+import com.example.commerce.dtos.responses.ApiResponse;
+import com.example.commerce.dtos.responses.LoginResponseDTO;
+import com.example.commerce.dtos.responses.PagedResponse;
+import com.example.commerce.dtos.responses.UserSummaryDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IUserService;
 import io.swagger.v3.oas.annotations.Operation;

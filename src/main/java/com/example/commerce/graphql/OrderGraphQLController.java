@@ -1,10 +1,10 @@
 package com.example.commerce.graphql;
 
 import com.example.commerce.config.GraphQLRequiresRole;
-import com.example.commerce.dtos.AddOrderDTO;
-import com.example.commerce.dtos.OrderItemDTO;
-import com.example.commerce.dtos.OrderResponseDTO;
-import com.example.commerce.dtos.UpdateOrderDTO;
+import com.example.commerce.dtos.requests.AddOrderDTO;
+import com.example.commerce.dtos.requests.OrderItemDTO;
+import com.example.commerce.dtos.responses.OrderResponseDTO;
+import com.example.commerce.dtos.requests.UpdateOrderDTO;
 import com.example.commerce.enums.OrderStatus;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IOrderService;

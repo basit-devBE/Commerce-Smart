@@ -1,9 +1,9 @@
 package com.example.commerce.services;
 
 import com.example.commerce.cache.CacheManager;
-import com.example.commerce.dtos.AddCategoryDTO;
-import com.example.commerce.dtos.CategoryResponseDTO;
-import com.example.commerce.dtos.UpdateCategoryDTO;
+import com.example.commerce.dtos.requests.AddCategoryDTO;
+import com.example.commerce.dtos.responses.CategoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateCategoryDTO;
 import com.example.commerce.entities.CategoryEntity;
 import com.example.commerce.entities.ProductEntity;
 import com.example.commerce.errorhandlers.ResourceAlreadyExists;

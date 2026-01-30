@@ -1,8 +1,8 @@
 package com.example.commerce.graphql;
 
 import com.example.commerce.config.GraphQLRequiresRole;
-import com.example.commerce.dtos.AddProductDTO;
-import com.example.commerce.dtos.ProductResponseDTO;
+import com.example.commerce.dtos.requests.AddProductDTO;
+import com.example.commerce.dtos.responses.ProductResponseDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IProductService;
 import graphql.schema.DataFetchingEnvironment;

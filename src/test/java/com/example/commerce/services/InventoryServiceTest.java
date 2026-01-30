@@ -1,8 +1,8 @@
 package com.example.commerce.services;
 
-import com.example.commerce.dtos.AddInventoryDTO;
-import com.example.commerce.dtos.InventoryResponseDTO;
-import com.example.commerce.dtos.UpdateInventoryDTO;
+import com.example.commerce.dtos.requests.AddInventoryDTO;
+import com.example.commerce.dtos.responses.InventoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateInventoryDTO;
 import com.example.commerce.entities.InventoryEntity;
 import com.example.commerce.entities.ProductEntity;
 import com.example.commerce.mappers.InventoryMapper;

@@ -1,6 +1,10 @@
 package com.example.commerce.interfaces;
 
-import com.example.commerce.dtos.*;
+import com.example.commerce.dtos.requests.LoginDTO;
+import com.example.commerce.dtos.requests.UpdateUserDTO;
+import com.example.commerce.dtos.requests.UserRegistrationDTO;
+import com.example.commerce.dtos.responses.LoginResponseDTO;
+import com.example.commerce.dtos.responses.UserSummaryDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

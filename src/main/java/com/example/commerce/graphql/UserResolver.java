@@ -1,10 +1,10 @@
 package com.example.commerce.graphql;
 
 import com.example.commerce.config.GraphQLRequiresRole;
-import com.example.commerce.dtos.LoginDTO;
-import com.example.commerce.dtos.LoginResponseDTO;
-import com.example.commerce.dtos.UserRegistrationDTO;
-import com.example.commerce.dtos.UserSummaryDTO;
+import com.example.commerce.dtos.requests.LoginDTO;
+import com.example.commerce.dtos.responses.LoginResponseDTO;
+import com.example.commerce.dtos.requests.UserRegistrationDTO;
+import com.example.commerce.dtos.responses.UserSummaryDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IUserService;
 import graphql.schema.DataFetchingEnvironment;

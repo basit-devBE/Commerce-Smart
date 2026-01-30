@@ -1,6 +1,10 @@
 package com.example.commerce.services;
 
-import com.example.commerce.dtos.*;
+import com.example.commerce.dtos.requests.LoginDTO;
+import com.example.commerce.dtos.requests.UpdateUserDTO;
+import com.example.commerce.dtos.requests.UserRegistrationDTO;
+import com.example.commerce.dtos.responses.LoginResponseDTO;
+import com.example.commerce.dtos.responses.UserSummaryDTO;
 import com.example.commerce.entities.UserEntity;
 import com.example.commerce.mappers.UserMapper;
 import com.example.commerce.cache.CacheManager;

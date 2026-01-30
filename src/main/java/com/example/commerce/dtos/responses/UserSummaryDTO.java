@@ -1,4 +1,4 @@
-package com.example.commerce.dtos;
+package com.example.commerce.dtos.responses;
 
 import com.example.commerce.enums.UserRole;
 import lombok.Data;

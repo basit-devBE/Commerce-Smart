@@ -2,7 +2,11 @@ package com.example.commerce.controllers;
 
 
 import com.example.commerce.config.RequiresRole;
-import com.example.commerce.dtos.*;
+import com.example.commerce.dtos.requests.AddProductDTO;
+import com.example.commerce.dtos.requests.UpdateProductDTO;
+import com.example.commerce.dtos.responses.ApiResponse;
+import com.example.commerce.dtos.responses.PagedResponse;
+import com.example.commerce.dtos.responses.ProductResponseDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IProductService;
 import com.example.commerce.utils.sorting.SortingService;

@@ -1,9 +1,9 @@
 package com.example.commerce.graphql;
 
 import com.example.commerce.config.GraphQLRequiresRole;
-import com.example.commerce.dtos.AddInventoryDTO;
-import com.example.commerce.dtos.InventoryResponseDTO;
-import com.example.commerce.dtos.UpdateInventoryDTO;
+import com.example.commerce.dtos.requests.AddInventoryDTO;
+import com.example.commerce.dtos.responses.InventoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateInventoryDTO;
 import com.example.commerce.enums.UserRole;
 import com.example.commerce.interfaces.IInventoryService;
 import graphql.schema.DataFetchingEnvironment;

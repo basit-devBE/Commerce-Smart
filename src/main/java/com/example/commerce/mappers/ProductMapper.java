@@ -1,8 +1,8 @@
 package com.example.commerce.mappers;
 
-import com.example.commerce.dtos.AddProductDTO;
-import com.example.commerce.dtos.ProductResponseDTO;
-import com.example.commerce.dtos.UpdateProductDTO;
+import com.example.commerce.dtos.requests.AddProductDTO;
+import com.example.commerce.dtos.responses.ProductResponseDTO;
+import com.example.commerce.dtos.requests.UpdateProductDTO;
 import com.example.commerce.entities.ProductEntity;
 import org.mapstruct.*;
 

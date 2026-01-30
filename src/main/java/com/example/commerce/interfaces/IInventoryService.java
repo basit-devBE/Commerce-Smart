@@ -1,8 +1,8 @@
 package com.example.commerce.interfaces;
 
-import com.example.commerce.dtos.AddInventoryDTO;
-import com.example.commerce.dtos.InventoryResponseDTO;
-import com.example.commerce.dtos.UpdateInventoryDTO;
+import com.example.commerce.dtos.requests.AddInventoryDTO;
+import com.example.commerce.dtos.responses.InventoryResponseDTO;
+import com.example.commerce.dtos.requests.UpdateInventoryDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

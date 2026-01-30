@@ -1,8 +1,8 @@
 package com.example.commerce.interfaces;
 
-import com.example.commerce.dtos.AddProductDTO;
-import com.example.commerce.dtos.ProductResponseDTO;
-import com.example.commerce.dtos.UpdateProductDTO;
+import com.example.commerce.dtos.requests.AddProductDTO;
+import com.example.commerce.dtos.responses.ProductResponseDTO;
+import com.example.commerce.dtos.requests.UpdateProductDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
