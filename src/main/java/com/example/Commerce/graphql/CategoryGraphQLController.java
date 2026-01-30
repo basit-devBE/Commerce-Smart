@@ -29,7 +29,7 @@ public class CategoryGraphQLController {
     public CategoryResponseDTO categoryById(@Argument Long id) {
         return categoryService.getCategoryById(id);
     }
-
+ 
     @MutationMapping
     public CategoryResponseDTO addCategory(@Argument AddCategoryInput input) {
         AddCategoryDTO dto = new AddCategoryDTO();
